@@ -74,6 +74,7 @@ func main() {
 
 	modules.Date(ch, cfgFile)
 	modules.Ram(ch, cfgFile)
+	modules.Swap(ch, cfgFile)
 
 	for msg = range ch {
 		msgMap[msg.Name] = msg.Json

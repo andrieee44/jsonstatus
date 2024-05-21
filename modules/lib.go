@@ -36,7 +36,7 @@ func DefaultConfig() *Config {
 	}
 }
 
-func sleepMessage(ch chan<- Message, name string, enable bool, sleep time.Duration, fn func() json.RawMessage) {
+func sendMessage(ch chan<- Message, name string, enable bool, sleep time.Duration, fn func() json.RawMessage) {
 	if !enable {
 		return
 	}

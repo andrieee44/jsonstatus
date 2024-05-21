@@ -12,7 +12,7 @@ type dateConfig struct {
 }
 
 func Date(ch chan<- Message, cfg *dateConfig) {
-	go sleepMessage(ch, "Date", cfg.Enable, cfg.Interval, func() json.RawMessage {
+	go sendMessage(ch, "Date", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Date string
 			Hour int

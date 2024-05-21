@@ -15,7 +15,7 @@ type swapConfig struct {
 }
 
 func Swap(ch chan<- Message, cfg *swapConfig) {
-	go sleepMessage(ch, "Swap", cfg.Enable, cfg.Interval, func() json.RawMessage {
+	go sendMessage(ch, "Swap", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Total, Free int
 			FreePerc    float64

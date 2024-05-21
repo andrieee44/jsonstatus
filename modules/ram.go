@@ -13,7 +13,7 @@ type ramConfig struct {
 }
 
 func Ram(ch chan<- Message, cfg *ramConfig) {
-	go sleepMessage(ch, "Ram", cfg.Enable, cfg.Interval, func() json.RawMessage {
+	go sendMessage(ch, "Ram", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Total, Free, Available, Used int
 			UsedPerc                     float64

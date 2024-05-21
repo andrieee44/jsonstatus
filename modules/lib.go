@@ -9,6 +9,7 @@ type Config struct {
 	Date dateConfig
 	Ram  ramConfig
 	Swap swapConfig
+	Cpu  cpuConfig
 }
 
 type Message struct {
@@ -30,6 +31,11 @@ func DefaultConfig() *Config {
 		},
 
 		Swap: swapConfig{
+			Enable:   true,
+			Interval: time.Second,
+		},
+
+		Cpu: cpuConfig{
 			Enable:   true,
 			Interval: time.Second,
 		},

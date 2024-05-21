@@ -22,8 +22,6 @@ func Ram(ch chan<- Message, cfg *ramConfig) {
 		var (
 			meminfo                                       *os.File
 			total, free, available, buffers, cached, used int
-			data                                          jsonStruct
-			dataJSON                                      json.RawMessage
 			err                                           error
 		)
 
@@ -46,19 +44,12 @@ Cached: %d kB
 
 		used = total - free - buffers - cached
 
-		data = jsonStruct{
+		return marshalRawJson(jsonStruct{
 			Total:     total,
 			Free:      free,
 			Available: available,
 			Used:      used,
 			UsedPerc:  float64(used) / float64(total) * 100,
-		}
-
-		dataJSON, err = json.Marshal(data)
-		if err != nil {
-			panic(err)
-		}
-
-		return dataJSON
+		})
 	})
 }

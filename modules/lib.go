@@ -36,6 +36,20 @@ func DefaultConfig() *Config {
 	}
 }
 
+func marshalRawJson(v any) json.RawMessage {
+	var (
+		data json.RawMessage
+		err  error
+	)
+
+	data, err = json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+
+	return data
+}
+
 func sendMessage(ch chan<- Message, name string, enable bool, sleep time.Duration, fn func() json.RawMessage) {
 	if !enable {
 		return

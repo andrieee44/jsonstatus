@@ -18,7 +18,7 @@ func Swap(ch chan<- Message, cfg *swapConfig) {
 	go sendMessage(ch, "Swap", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Total, Free int
-			FreePerc    float64
+			UsedPerc    float64
 		}
 
 		var (
@@ -26,8 +26,6 @@ func Swap(ch chan<- Message, cfg *swapConfig) {
 			scanner             *bufio.Scanner
 			fields              []string
 			cached, total, free int
-			data                jsonStruct
-			dataJSON            json.RawMessage
 			err                 error
 		)
 
@@ -75,18 +73,10 @@ func Swap(ch chan<- Message, cfg *swapConfig) {
 			}
 		}
 
-		data = jsonStruct{
+		return marshalRawJson(jsonStruct{
 			Total:    total,
 			Free:     free,
-			FreePerc: float64(total-free-cached) / float64(total) * 100,
-		}
-
-		dataJSON, err = json.Marshal(data)
-		if err != nil {
-			panic(err)
-		}
-
-		return dataJSON
-
+			UsedPerc: float64(total-cached-free) / float64(total) * 100,
+		})
 	})
 }

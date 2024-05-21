@@ -19,11 +19,8 @@ func Date(ch chan<- Message, cfg *dateConfig) {
 		}
 
 		var (
-			date     time.Time
-			hour     int
-			data     jsonStruct
-			jsonData json.RawMessage
-			err      error
+			date time.Time
+			hour int
 		)
 
 		date = time.Now()
@@ -33,16 +30,9 @@ func Date(ch chan<- Message, cfg *dateConfig) {
 			hour -= 12
 		}
 
-		data = jsonStruct{
+		return marshalRawJson(jsonStruct{
 			Hour: hour,
 			Date: date.Format(cfg.Format),
-		}
-
-		jsonData, err = json.Marshal(data)
-		if err != nil {
-			panic(err)
-		}
-
-		return jsonData
+		})
 	})
 }

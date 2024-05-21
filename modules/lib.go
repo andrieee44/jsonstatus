@@ -2,22 +2,28 @@ package modules
 
 import (
 	"encoding/json"
+	"os"
 	"time"
 
 	"github.com/BurntSushi/toml"
 )
 
-type Module func(chan<- Message, *toml.Decoder)
+type Module func(chan<- Message, *os.File)
 
 type Message struct {
 	Name string
 	Json json.RawMessage
 }
 
-func decode(decoder *toml.Decoder, cfg interface{}) {
+func decode(cfgFile *os.File, cfg interface{}) {
 	var err error
 
-	_, err = decoder.Decode(cfg)
+	_, err = cfgFile.Seek(0, 0)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = toml.NewDecoder(cfgFile).Decode(cfg)
 	if err != nil {
 		panic(err)
 	}

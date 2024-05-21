@@ -2,34 +2,41 @@ package modules
 
 import (
 	"encoding/json"
-	"os"
 	"time"
-
-	"github.com/BurntSushi/toml"
 )
 
-type Module func(chan<- Message, *os.File)
+type Config struct {
+	Date dateConfig
+	Ram  ramConfig
+	Swap swapConfig
+}
 
 type Message struct {
 	Name string
 	Json json.RawMessage
 }
 
-func decode(cfgFile *os.File, cfg interface{}) {
-	var err error
+func DefaultConfig() *Config {
+	return &Config{
+		Date: dateConfig{
+			Enable:   true,
+			Interval: time.Minute,
+			Format:   "Jan _2 2006 (Mon) 3:04 PM",
+		},
 
-	_, err = cfgFile.Seek(0, 0)
-	if err != nil {
-		panic(err)
-	}
+		Ram: ramConfig{
+			Enable:   true,
+			Interval: time.Second,
+		},
 
-	_, err = toml.NewDecoder(cfgFile).Decode(cfg)
-	if err != nil {
-		panic(err)
+		Swap: swapConfig{
+			Enable:   true,
+			Interval: time.Second,
+		},
 	}
 }
 
-func sendMessage(ch chan<- Message, name string, enable bool, sleep time.Duration, fn func() json.RawMessage) {
+func sleepMessage(ch chan<- Message, name string, enable bool, sleep time.Duration, fn func() json.RawMessage) {
 	if !enable {
 		return
 	}

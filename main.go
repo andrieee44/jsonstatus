@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/BurntSushi/toml"
 	"github.com/andrieee44/jsonstatus/modules"
 )
 
@@ -58,11 +59,27 @@ func configFile() *os.File {
 	return file
 }
 
+func configToml() *modules.Config {
+	var (
+		cfg *modules.Config
+		err error
+	)
+
+	cfg = modules.DefaultConfig()
+
+	_, err = toml.NewDecoder(configFile()).Decode(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	return cfg
+}
+
 func main() {
 	var (
 		ch       chan modules.Message
 		msgMap   map[string]json.RawMessage
-		cfgFile  *os.File
+		cfg      *modules.Config
 		msg      modules.Message
 		jsonData []byte
 		err      error
@@ -70,11 +87,11 @@ func main() {
 
 	ch = make(chan modules.Message)
 	msgMap = make(map[string]json.RawMessage)
-	cfgFile = configFile()
+	cfg = configToml()
 
-	modules.Date(ch, cfgFile)
-	modules.Ram(ch, cfgFile)
-	modules.Swap(ch, cfgFile)
+	modules.Date(ch, &cfg.Date)
+	modules.Ram(ch, &cfg.Ram)
+	modules.Swap(ch, &cfg.Swap)
 
 	for msg = range ch {
 		msgMap[msg.Name] = msg.Json

@@ -9,22 +9,13 @@ import (
 	"time"
 )
 
-func Swap(ch chan<- Message, cfgFile *os.File) {
-	type config struct {
-		Enable   bool          `toml:"swap_enable"`
-		Interval time.Duration `toml:"swap_interval"`
-	}
+type swapConfig struct {
+	Enable   bool
+	Interval time.Duration
+}
 
-	var cfg config
-
-	cfg = config{
-		Enable:   true,
-		Interval: time.Second,
-	}
-
-	decode(cfgFile, &cfg)
-
-	go sendMessage(ch, "Swap", cfg.Enable, cfg.Interval, func() json.RawMessage {
+func Swap(ch chan<- Message, cfg *swapConfig) {
+	go sleepMessage(ch, "Swap", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Total, Free int
 			FreePerc    float64

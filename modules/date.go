@@ -2,28 +2,17 @@ package modules
 
 import (
 	"encoding/json"
-	"os"
 	"time"
 )
 
-func Date(ch chan<- Message, cfgFile *os.File) {
-	type config struct {
-		Enable   bool          `toml:"date_enable"`
-		Interval time.Duration `toml:"date_interval"`
-		Format   string        `toml:"date_format"`
-	}
+type dateConfig struct {
+	Enable   bool
+	Interval time.Duration
+	Format   string
+}
 
-	var cfg config
-
-	cfg = config{
-		Enable:   true,
-		Interval: time.Minute,
-		Format:   "Jan _2 2006 (Mon) 3:04 PM",
-	}
-
-	decode(cfgFile, &cfg)
-
-	go sendMessage(ch, "Date", cfg.Enable, cfg.Interval, func() json.RawMessage {
+func Date(ch chan<- Message, cfg *dateConfig) {
+	go sleepMessage(ch, "Date", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Date string
 			Hour int

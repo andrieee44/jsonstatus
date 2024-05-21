@@ -7,22 +7,13 @@ import (
 	"time"
 )
 
-func Ram(ch chan<- Message, cfgFile *os.File) {
-	type config struct {
-		Enable   bool          `toml:"ram_enable"`
-		Interval time.Duration `toml:"ram_interval"`
-	}
+type ramConfig struct {
+	Enable   bool
+	Interval time.Duration
+}
 
-	var cfg config
-
-	cfg = config{
-		Enable:   true,
-		Interval: time.Second,
-	}
-
-	decode(cfgFile, &cfg)
-
-	go sendMessage(ch, "Ram", cfg.Enable, cfg.Interval, func() json.RawMessage {
+func Ram(ch chan<- Message, cfg *ramConfig) {
+	go sleepMessage(ch, "Ram", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Total, Free, Available, Used int
 			UsedPerc                     float64

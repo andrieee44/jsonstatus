@@ -1,11 +1,7 @@
 package modules
 
 import (
-	"bufio"
 	"encoding/json"
-	"os"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -22,56 +18,17 @@ func Swap(ch chan<- Message, cfg *swapConfig) {
 		}
 
 		var (
-			meminfo             *os.File
-			scanner             *bufio.Scanner
-			fields              []string
-			cached, total, free int
-			err                 error
+			meminfo             map[string]int
+			total, free, cached int
 		)
 
-		meminfo, err = os.Open("/proc/meminfo")
-		if err != nil {
-			panic(err)
-		}
+		meminfo = meminfoMap([]string{
+			"SwapCached",
+			"SwapTotal",
+			"SwapFree",
+		})
 
-		defer meminfo.Close()
-
-		scanner = bufio.NewScanner(meminfo)
-
-		for {
-			if !scanner.Scan() {
-				err = scanner.Err()
-				if err != nil {
-					panic(err)
-				}
-
-				break
-			}
-
-			fields = strings.Fields(scanner.Text())
-
-			switch fields[0] {
-			case "SwapCached:":
-				cached, err = strconv.Atoi(fields[1])
-				if err != nil {
-					panic(err)
-				}
-
-			case "SwapTotal:":
-				total, err = strconv.Atoi(fields[1])
-				if err != nil {
-					panic(err)
-				}
-
-			case "SwapFree:":
-				free, err = strconv.Atoi(fields[1])
-				if err != nil {
-					panic(err)
-				}
-
-				break
-			}
-		}
+		total, free, cached = meminfo["SwapTotal"], meminfo["SwapFree"], meminfo["SwapCached"]
 
 		return marshalRawJson(jsonStruct{
 			Total:    total,

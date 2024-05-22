@@ -2,8 +2,6 @@ package modules
 
 import (
 	"encoding/json"
-	"fmt"
-	"os"
 	"time"
 )
 
@@ -20,36 +18,26 @@ func Ram(ch chan<- Message, cfg *ramConfig) {
 		}
 
 		var (
-			meminfo                                       *os.File
-			total, free, available, buffers, cached, used int
-			err                                           error
+			meminfo map[string]int
+			used    int
 		)
 
-		meminfo, err = os.Open("/proc/meminfo")
-		if err != nil {
-			panic(err)
-		}
+		meminfo = meminfoMap([]string{
+			"MemTotal",
+			"MemFree",
+			"MemAvailable",
+			"Buffers",
+			"Cached",
+		})
 
-		defer meminfo.Close()
-
-		_, err = fmt.Fscanf(meminfo, `MemTotal: %d kB
-MemFree: %d kB
-MemAvailable: %d kB
-Buffers: %d kB
-Cached: %d kB
-`, &total, &free, &available, &buffers, &cached)
-		if err != nil {
-			panic(err)
-		}
-
-		used = total - free - buffers - cached
+		used = meminfo["MemTotal"] - meminfo["MemFree"] - meminfo["Buffers"] - meminfo["Cached"]
 
 		return marshalRawJson(jsonStruct{
-			Total:     total,
-			Free:      free,
-			Available: available,
+			Total:     meminfo["MemTotal"],
+			Free:      meminfo["MemFree"],
+			Available: meminfo["MemAvailable"],
 			Used:      used,
-			UsedPerc:  float64(used) / float64(total) * 100,
+			UsedPerc:  float64(used) / float64(meminfo["MemTotal"]) * 100,
 		})
 	})
 }

@@ -14,7 +14,7 @@ type cpuConfig struct {
 
 func cpuFreq() int {
 	var (
-		buf    []byte
+		buf  []byte
 		freq int
 		err  error
 	)
@@ -46,7 +46,7 @@ func Cpu(ch chan<- Message, cfg *cpuConfig) {
 		}
 
 		return marshalRawJson(jsonStruct{
-			Frequency: cpuFreq(),
+			Frequency:   cpuFreq(),
 			AveragePerc: cpuAveragePerc(prev),
 		})
 	})

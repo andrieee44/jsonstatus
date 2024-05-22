@@ -12,11 +12,11 @@ import (
 )
 
 type Config struct {
-	Date       dateConfig
-	Ram        ramConfig
-	Swap       swapConfig
-	Cpu        cpuConfig
-	Brightness brightnessConfig
+	Date dateConfig
+	Ram  ramConfig
+	Swap swapConfig
+	Cpu  cpuConfig
+	Bri  briConfig
 }
 
 type Message struct {
@@ -47,7 +47,7 @@ func DefaultConfig() *Config {
 			Interval: time.Second,
 		},
 
-		Brightness: brightnessConfig{
+		Bri: briConfig{
 			Enable: true,
 		},
 	}

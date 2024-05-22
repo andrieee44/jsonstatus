@@ -100,7 +100,7 @@ func main() {
 	modules.Ram(ch, &cfg.Ram)
 	modules.Swap(ch, &cfg.Swap)
 	modules.Cpu(ch, &cfg.Cpu)
-	modules.Brightness(ch, &cfg.Brightness)
+	modules.Bri(ch, &cfg.Bri)
 
 	for msg = range ch {
 		msgMap[msg.Name] = msg.Json

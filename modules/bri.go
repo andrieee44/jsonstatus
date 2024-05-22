@@ -2,11 +2,11 @@ package modules
 
 import "github.com/fsnotify/fsnotify"
 
-type brightnessConfig struct {
+type briConfig struct {
 	Enable bool
 }
 
-func Brightness(ch chan<- Message, cfg *brightnessConfig) {
+func Bri(ch chan<- Message, cfg *briConfig) {
 	const briPath string = "/sys/class/backlight/intel_backlight/brightness"
 
 	var (
@@ -34,7 +34,7 @@ func Brightness(ch chan<- Message, cfg *brightnessConfig) {
 
 		for {
 			ch <- Message{
-				Name: "Brightness",
+				Name: "Bri",
 				Json: marshalRawJson(float64(pathAtoi(briPath)) / float64(maxBri) * 100),
 			}
 

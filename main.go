@@ -101,6 +101,7 @@ func main() {
 	modules.Swap(ch, &cfg.Swap)
 	modules.Cpu(ch, &cfg.Cpu)
 	modules.Bri(ch, &cfg.Bri)
+	modules.Bat(ch, &cfg.Bat)
 
 	for msg = range ch {
 		msgMap[msg.Name] = msg.Json

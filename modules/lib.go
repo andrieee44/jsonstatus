@@ -17,6 +17,7 @@ type Config struct {
 	Swap swapConfig
 	Cpu  cpuConfig
 	Bri  briConfig
+	Bat  batConfig
 }
 
 type Message struct {
@@ -49,6 +50,11 @@ func DefaultConfig() *Config {
 
 		Bri: briConfig{
 			Enable: true,
+		},
+
+		Bat: batConfig{
+			Enable:   true,
+			Interval: time.Minute,
 		},
 	}
 }

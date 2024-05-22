@@ -61,13 +61,20 @@ func configFile() *os.File {
 
 func configToml() *modules.Config {
 	var (
+		cfgFile *os.File
 		cfg *modules.Config
 		err error
 	)
 
+	cfgFile = configFile()
 	cfg = modules.DefaultConfig()
 
-	_, err = toml.NewDecoder(configFile()).Decode(cfg)
+	_, err = toml.NewDecoder(cfgFile).Decode(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	err = cfgFile.Close()
 	if err != nil {
 		panic(err)
 	}

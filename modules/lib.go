@@ -108,6 +108,11 @@ func meminfoMap(keys []string) map[string]int {
 		panic(err)
 	}
 
+	err = meminfo.Close()
+	if err != nil {
+		panic(err)
+	}
+
 	return keyVal
 }
 

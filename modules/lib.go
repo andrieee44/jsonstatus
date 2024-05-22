@@ -7,13 +7,16 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 type Config struct {
-	Date dateConfig
-	Ram  ramConfig
-	Swap swapConfig
-	Cpu  cpuConfig
+	Date       dateConfig
+	Ram        ramConfig
+	Swap       swapConfig
+	Cpu        cpuConfig
+	Brightness brightnessConfig
 }
 
 type Message struct {
@@ -43,7 +46,78 @@ func DefaultConfig() *Config {
 			Enable:   true,
 			Interval: time.Second,
 		},
+
+		Brightness: brightnessConfig{
+			Enable: true,
+		},
 	}
+}
+
+func mkWatcher(files []string) *fsnotify.Watcher {
+	var (
+		watcher *fsnotify.Watcher
+		v       string
+		err     error
+	)
+
+	watcher, err = fsnotify.NewWatcher()
+	if err != nil {
+		panic(err)
+	}
+
+	for _, v = range files {
+		err = watcher.Add(v)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return watcher
+}
+
+func notifyWatcher(watcher *fsnotify.Watcher, handler func(fsnotify.Event) bool) {
+	var (
+		event fsnotify.Event
+		ok    bool
+		err   error
+	)
+
+	for {
+		select {
+		case event, ok = <-watcher.Events:
+			if !ok || handler(event) {
+				return
+			}
+		case err, ok = <-watcher.Errors:
+			if !ok {
+				return
+			}
+
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+}
+
+func pathAtoi(path string) int {
+	var (
+		buf []byte
+		num int
+		err error
+	)
+
+	buf, err = os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+
+	num, err = strconv.Atoi(string(buf[:len(buf)-1]))
+	if err != nil {
+		panic(err)
+	}
+
+	return num
 }
 
 func removeKey(keys []string, key string) ([]string, bool) {

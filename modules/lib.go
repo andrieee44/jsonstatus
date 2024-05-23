@@ -12,14 +12,15 @@ import (
 )
 
 type Config struct {
-	Date  dateConfig
-	Ram   ramConfig
-	Swap  swapConfig
-	Cpu   cpuConfig
-	Bri   briConfig
-	Bat   batConfig
-	Music musicConfig
-	Vol   volConfig
+	Date   dateConfig
+	Ram    ramConfig
+	Swap   swapConfig
+	Cpu    cpuConfig
+	Bri    briConfig
+	Bat    batConfig
+	Music  musicConfig
+	Vol    volConfig
+	Uptime uptimeConfig
 }
 
 type Message struct {
@@ -66,6 +67,11 @@ func DefaultConfig() *Config {
 
 		Vol: volConfig{
 			Enable: true,
+		},
+
+		Uptime: uptimeConfig{
+			Enable:   true,
+			Interval: time.Minute,
 		},
 	}
 }

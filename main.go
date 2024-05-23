@@ -104,6 +104,7 @@ func main() {
 	modules.Bat(ch, &cfg.Bat)
 	modules.Music(ch, &cfg.Music)
 	modules.Vol(ch, &cfg.Vol)
+	modules.Uptime(ch, &cfg.Uptime)
 
 	for msg = range ch {
 		msgMap[msg.Name] = msg.Json

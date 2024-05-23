@@ -102,6 +102,7 @@ func main() {
 	modules.Cpu(ch, &cfg.Cpu)
 	modules.Bri(ch, &cfg.Bri)
 	modules.Bat(ch, &cfg.Bat)
+	modules.Music(ch, &cfg.Music)
 
 	for msg = range ch {
 		msgMap[msg.Name] = msg.Json

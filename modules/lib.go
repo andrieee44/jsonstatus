@@ -12,12 +12,13 @@ import (
 )
 
 type Config struct {
-	Date dateConfig
-	Ram  ramConfig
-	Swap swapConfig
-	Cpu  cpuConfig
-	Bri  briConfig
-	Bat  batConfig
+	Date  dateConfig
+	Ram   ramConfig
+	Swap  swapConfig
+	Cpu   cpuConfig
+	Bri   briConfig
+	Bat   batConfig
+	Music musicConfig
 }
 
 type Message struct {
@@ -55,6 +56,11 @@ func DefaultConfig() *Config {
 		Bat: batConfig{
 			Enable:   true,
 			Interval: time.Minute,
+		},
+
+		Music: musicConfig{
+			Enable:   true,
+			Interval: time.Second,
 		},
 	}
 }

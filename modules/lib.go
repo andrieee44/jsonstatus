@@ -19,6 +19,7 @@ type Config struct {
 	Bri   briConfig
 	Bat   batConfig
 	Music musicConfig
+	Vol   volConfig
 }
 
 type Message struct {
@@ -61,6 +62,10 @@ func DefaultConfig() *Config {
 		Music: musicConfig{
 			Enable:   true,
 			Interval: time.Second,
+		},
+
+		Vol: volConfig{
+			Enable: true,
 		},
 	}
 }

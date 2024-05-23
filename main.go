@@ -103,6 +103,7 @@ func main() {
 	modules.Bri(ch, &cfg.Bri)
 	modules.Bat(ch, &cfg.Bat)
 	modules.Music(ch, &cfg.Music)
+	modules.Vol(ch, &cfg.Vol)
 
 	for msg = range ch {
 		msgMap[msg.Name] = msg.Json

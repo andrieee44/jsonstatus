@@ -21,11 +21,25 @@ type Config struct {
 	Music  musicConfig
 	Vol    volConfig
 	Uptime uptimeConfig
+	User   userConfig
 }
 
 type Message struct {
 	Name string
 	Json json.RawMessage
+}
+
+func Run(ch chan<- Message, cfg *Config) {
+	Date(ch, &cfg.Date)
+	Ram(ch, &cfg.Ram)
+	Swap(ch, &cfg.Swap)
+	Cpu(ch, &cfg.Cpu)
+	Bri(ch, &cfg.Bri)
+	Bat(ch, &cfg.Bat)
+	Music(ch, &cfg.Music)
+	Vol(ch, &cfg.Vol)
+	Uptime(ch, &cfg.Uptime)
+	User(ch, &cfg.User)
 }
 
 func DefaultConfig() *Config {
@@ -72,6 +86,10 @@ func DefaultConfig() *Config {
 		Uptime: uptimeConfig{
 			Enable:   true,
 			Interval: time.Minute,
+		},
+
+		User: userConfig{
+			Enable: true,
 		},
 	}
 }
@@ -227,17 +245,28 @@ func marshalRawJson(v any) json.RawMessage {
 	return data
 }
 
-func sendMessage(ch chan<- Message, name string, enable bool, sleep time.Duration, fn func() json.RawMessage) {
+func sendMessage(ch chan<- Message, name string, msg json.RawMessage) {
+	ch <- Message{
+		Name: name,
+		Json: msg,
+	}
+}
+
+func onceMessage(ch chan<- Message, name string, enable bool, msg json.RawMessage) {
+	if !enable {
+		return
+	}
+
+	sendMessage(ch, name, msg)
+}
+
+func loopMessage(ch chan<- Message, name string, enable bool, sleep time.Duration, fn func() json.RawMessage) {
 	if !enable {
 		return
 	}
 
 	for {
-		ch <- Message{
-			Name: name,
-			Json: fn(),
-		}
-
+		sendMessage(ch, name, fn())
 		time.Sleep(sleep)
 	}
 }

@@ -13,7 +13,7 @@ type batConfig struct {
 }
 
 func Bat(ch chan<- Message, cfg *batConfig) {
-	go sendMessage(ch, "Bat", cfg.Enable, cfg.Interval, func() json.RawMessage {
+	go loopMessage(ch, "Bat", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type batInfo struct {
 			Status   string
 			Capacity int

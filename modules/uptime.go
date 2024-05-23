@@ -14,7 +14,7 @@ type uptimeConfig struct {
 }
 
 func Uptime(ch chan<- Message, cfg *uptimeConfig) {
-	go sendMessage(ch, "Uptime", cfg.Enable, cfg.Interval, func() json.RawMessage {
+	go loopMessage(ch, "Uptime", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Hours, Minutes, Seconds int
 		}

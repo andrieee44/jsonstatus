@@ -86,7 +86,6 @@ func main() {
 	var (
 		ch       chan modules.Message
 		msgMap   map[string]json.RawMessage
-		cfg      *modules.Config
 		msg      modules.Message
 		jsonData []byte
 		err      error
@@ -94,17 +93,7 @@ func main() {
 
 	ch = make(chan modules.Message)
 	msgMap = make(map[string]json.RawMessage)
-	cfg = configToml()
-
-	modules.Date(ch, &cfg.Date)
-	modules.Ram(ch, &cfg.Ram)
-	modules.Swap(ch, &cfg.Swap)
-	modules.Cpu(ch, &cfg.Cpu)
-	modules.Bri(ch, &cfg.Bri)
-	modules.Bat(ch, &cfg.Bat)
-	modules.Music(ch, &cfg.Music)
-	modules.Vol(ch, &cfg.Vol)
-	modules.Uptime(ch, &cfg.Uptime)
+	modules.Run(ch, configToml())
 
 	for msg = range ch {
 		msgMap[msg.Name] = msg.Json

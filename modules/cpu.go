@@ -86,7 +86,7 @@ func cpuAveragePerc(prev cpuSample) (cpuSample, float64) {
 func Cpu(ch chan<- Message, cfg *cpuConfig) {
 	var prev cpuSample
 
-	go sendMessage(ch, "Cpu", cfg.Enable, cfg.Interval, func() json.RawMessage {
+	go loopMessage(ch, "Cpu", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Frequency   int
 			AveragePerc float64

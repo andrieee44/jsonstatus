@@ -11,7 +11,7 @@ type musicConfig struct {
 	Interval time.Duration
 }
 
-func Music(ch chan<- Message, cfg *musicConfig) {
+func music(ch chan<- Message, cfg *musicConfig) {
 	type jsonStruct struct {
 		Music, Status mpd.Attrs
 		Index         int

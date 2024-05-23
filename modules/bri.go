@@ -6,7 +6,7 @@ type briConfig struct {
 	Enable bool
 }
 
-func Bri(ch chan<- Message, cfg *briConfig) {
+func bri(ch chan<- Message, cfg *briConfig) {
 	const briPath string = "/sys/class/backlight/intel_backlight/brightness"
 
 	var (

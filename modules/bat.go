@@ -12,7 +12,7 @@ type batConfig struct {
 	Interval time.Duration
 }
 
-func Bat(ch chan<- Message, cfg *batConfig) {
+func bat(ch chan<- Message, cfg *batConfig) {
 	go loopMessage(ch, "Bat", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type batInfo struct {
 			Status   string

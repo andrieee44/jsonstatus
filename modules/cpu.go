@@ -83,7 +83,7 @@ func cpuAveragePerc(prev cpuSample) (cpuSample, float64) {
 	return sample, float64(delta-(sample.idle-prev.idle)) / float64(delta) * 100
 }
 
-func Cpu(ch chan<- Message, cfg *cpuConfig) {
+func cpu(ch chan<- Message, cfg *cpuConfig) {
 	var prev cpuSample
 
 	go loopMessage(ch, "Cpu", cfg.Enable, cfg.Interval, func() json.RawMessage {

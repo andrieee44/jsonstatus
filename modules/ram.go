@@ -10,7 +10,7 @@ type ramConfig struct {
 	Interval time.Duration
 }
 
-func Ram(ch chan<- Message, cfg *ramConfig) {
+func ram(ch chan<- Message, cfg *ramConfig) {
 	go loopMessage(ch, "Ram", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Total, Free, Available, Used int

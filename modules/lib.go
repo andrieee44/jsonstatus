@@ -30,16 +30,16 @@ type Message struct {
 }
 
 func Run(ch chan<- Message, cfg *Config) {
-	Date(ch, &cfg.Date)
-	Ram(ch, &cfg.Ram)
-	Swap(ch, &cfg.Swap)
-	Cpu(ch, &cfg.Cpu)
-	Bri(ch, &cfg.Bri)
-	Bat(ch, &cfg.Bat)
-	Music(ch, &cfg.Music)
-	Vol(ch, &cfg.Vol)
-	Uptime(ch, &cfg.Uptime)
-	User(ch, &cfg.User)
+	date(ch, &cfg.Date)
+	ram(ch, &cfg.Ram)
+	swap(ch, &cfg.Swap)
+	cpu(ch, &cfg.Cpu)
+	bri(ch, &cfg.Bri)
+	bat(ch, &cfg.Bat)
+	music(ch, &cfg.Music)
+	vol(ch, &cfg.Vol)
+	uptime(ch, &cfg.Uptime)
+	currentUser(ch, &cfg.User)
 }
 
 func DefaultConfig() *Config {

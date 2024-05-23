@@ -10,7 +10,7 @@ type volConfig struct {
 	Enable bool
 }
 
-func Vol(ch chan<- Message, cfg *volConfig) {
+func vol(ch chan<- Message, cfg *volConfig) {
 	type jsonStruct struct {
 		Volume float64
 		Mute   bool

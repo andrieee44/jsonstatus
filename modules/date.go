@@ -11,7 +11,7 @@ type dateConfig struct {
 	Format   string
 }
 
-func Date(ch chan<- Message, cfg *dateConfig) {
+func date(ch chan<- Message, cfg *dateConfig) {
 	go loopMessage(ch, "Date", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Date string

@@ -6,7 +6,7 @@ type userConfig struct {
 	Enable bool
 }
 
-func User(ch chan<- Message, cfg *userConfig) {
+func currentUser(ch chan<- Message, cfg *userConfig) {
 	type jsonStruct struct {
 		UID, GID, Name string
 	}

@@ -10,7 +10,7 @@ type swapConfig struct {
 	Interval time.Duration
 }
 
-func Swap(ch chan<- Message, cfg *swapConfig) {
+func swap(ch chan<- Message, cfg *swapConfig) {
 	go loopMessage(ch, "Swap", cfg.Enable, cfg.Interval, func() json.RawMessage {
 		type jsonStruct struct {
 			Total, Free int

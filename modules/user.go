@@ -1,6 +1,9 @@
 package modules
 
-import "os/user"
+import (
+	"os"
+	"os/user"
+)
 
 type userConfig struct {
 	Enable bool
@@ -8,11 +11,12 @@ type userConfig struct {
 
 func currentUser(ch chan<- Message, cfg *userConfig) {
 	type jsonStruct struct {
-		UID, GID, Name string
+		UID, GID, Name, Host string
 	}
 
 	var (
 		currentUser *user.User
+		host        string
 		err         error
 	)
 
@@ -25,9 +29,15 @@ func currentUser(ch chan<- Message, cfg *userConfig) {
 		panic(err)
 	}
 
+	host, err = os.Hostname()
+	if err != nil {
+		panic(err)
+	}
+
 	go onceMessage(ch, "User", cfg.Enable, marshalRawJson(jsonStruct{
 		UID:  currentUser.Uid,
 		GID:  currentUser.Gid,
 		Name: currentUser.Username,
+		Host: host,
 	}))
 }

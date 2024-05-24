@@ -17,12 +17,11 @@ func vol(ch chan<- Message, cfg *volConfig) {
 	}
 
 	var (
-		client  *pulseaudio.Client
-		volume  float32
-		mute    bool
-		updates <-chan struct{}
-		ok      bool
-		err     error
+		client   *pulseaudio.Client
+		volume   float32
+		mute, ok bool
+		updates  <-chan struct{}
+		err      error
 	)
 
 	if !cfg.Enable {

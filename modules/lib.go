@@ -22,6 +22,7 @@ type Config struct {
 	Vol    volConfig
 	Uptime uptimeConfig
 	User   userConfig
+	Disk   diskConfig
 }
 
 type Message struct {
@@ -40,6 +41,7 @@ func Run(ch chan<- Message, cfg *Config) {
 	vol(ch, &cfg.Vol)
 	uptime(ch, &cfg.Uptime)
 	currentUser(ch, &cfg.User)
+	disk(ch, &cfg.Disk)
 }
 
 func DefaultConfig() *Config {
@@ -90,6 +92,12 @@ func DefaultConfig() *Config {
 
 		User: userConfig{
 			Enable: true,
+		},
+
+		Disk: diskConfig{
+			Enable:   true,
+			Interval: time.Minute,
+			Disks:    []string{"/"},
 		},
 	}
 }

@@ -43,7 +43,7 @@ func disk(ch chan<- Message, cfg *diskConfig) {
 			disks[v] = diskStruct{
 				Free:     free,
 				Total:    total,
-				Used:     total - free,
+				Used:     used,
 				UsedPerc: float64(used) / float64(total) * 100,
 			}
 		}

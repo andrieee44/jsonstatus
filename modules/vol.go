@@ -29,28 +29,20 @@ func vol(ch chan<- Message, cfg *volConfig) {
 	}
 
 	client, err = pulseaudio.NewClient()
-	if err != nil {
-		panic(err)
-	}
+	panicIf(err)
 
 	updates, err = client.Updates()
-	if err != nil {
-		panic(err)
-	}
+	panicIf(err)
 
 	go func() {
 		defer client.Close()
 
 		for {
 			volume, err = client.Volume()
-			if err != nil {
-				panic(err)
-			}
+			panicIf(err)
 
 			mute, err = client.Mute()
-			if err != nil {
-				panic(err)
-			}
+			panicIf(err)
 
 			ch <- Message{
 				Name: "Vol",

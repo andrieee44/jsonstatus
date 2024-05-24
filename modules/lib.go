@@ -3,6 +3,7 @@ package modules
 import (
 	"bufio"
 	"encoding/json"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -102,6 +103,12 @@ func DefaultConfig() *Config {
 	}
 }
 
+func panicIf(err error) {
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
 func mkWatcher(files []string) *fsnotify.Watcher {
 	var (
 		watcher *fsnotify.Watcher
@@ -110,15 +117,10 @@ func mkWatcher(files []string) *fsnotify.Watcher {
 	)
 
 	watcher, err = fsnotify.NewWatcher()
-	if err != nil {
-		panic(err)
-	}
+	panicIf(err)
 
 	for _, v = range files {
-		err = watcher.Add(v)
-		if err != nil {
-			panic(err)
-		}
+		panicIf(watcher.Add(v))
 	}
 
 	return watcher
@@ -142,9 +144,7 @@ func notifyWatcher(watcher *fsnotify.Watcher, handler func(fsnotify.Event) bool)
 				return
 			}
 
-			if err != nil {
-				panic(err)
-			}
+			panicIf(err)
 		}
 	}
 }
@@ -157,14 +157,10 @@ func pathAtoi(path string) int {
 	)
 
 	buf, err = os.ReadFile(path)
-	if err != nil {
-		panic(err)
-	}
+	panicIf(err)
 
 	num, err = strconv.Atoi(string(buf[:len(buf)-1]))
-	if err != nil {
-		panic(err)
-	}
+	panicIf(err)
 
 	return num
 }
@@ -199,9 +195,7 @@ func meminfoMap(keys []string) map[string]int {
 	keyVal = make(map[string]int)
 
 	meminfo, err = os.Open("/proc/meminfo")
-	if err != nil {
-		panic(err)
-	}
+	panicIf(err)
 
 	scanner = bufio.NewScanner(meminfo)
 
@@ -215,9 +209,7 @@ func meminfoMap(keys []string) map[string]int {
 		}
 
 		val, err = strconv.Atoi(fields[1])
-		if err != nil {
-			panic(err)
-		}
+		panicIf(err)
 
 		keyVal[key] = val
 
@@ -226,15 +218,8 @@ func meminfoMap(keys []string) map[string]int {
 		}
 	}
 
-	err = scanner.Err()
-	if err != nil {
-		panic(err)
-	}
-
-	err = meminfo.Close()
-	if err != nil {
-		panic(err)
-	}
+	panicIf(scanner.Err())
+	panicIf(meminfo.Close())
 
 	return keyVal
 }
@@ -246,9 +231,7 @@ func marshalRawJson(v any) json.RawMessage {
 	)
 
 	data, err = json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
+	panicIf(err)
 
 	return data
 }

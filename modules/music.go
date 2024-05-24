@@ -31,40 +31,23 @@ func music(ch chan<- Message, cfg *musicConfig) {
 	}
 
 	client, err = mpd.Dial("tcp", "127.0.0.1:6600")
-	if err != nil {
-		panic(err)
-	}
+	panicIf(err)
 
 	watcher, err = mpd.NewWatcher("tcp", "127.0.0.1:6600", "", "player")
-	if err != nil {
-		panic(err)
-	}
+	panicIf(err)
 
 	go func() {
 		defer func() {
-			var err error
-
-			err = client.Close()
-			if err != nil {
-				panic(err)
-			}
-
-			err = watcher.Close()
-			if err != nil {
-				panic(err)
-			}
+			panicIf(client.Close())
+			panicIf(watcher.Close())
 		}()
 
 		for {
 			music, err = client.CurrentSong()
-			if err != nil {
-				panic(err)
-			}
+			panicIf(err)
 
 			status, err = client.Status()
-			if err != nil {
-				panic(err)
-			}
+			panicIf(err)
 
 			ch <- Message{
 				Name: "Music",
@@ -87,9 +70,7 @@ func music(ch chan<- Message, cfg *musicConfig) {
 					return
 				}
 
-				if err != nil {
-					panic(err)
-				}
+				panicIf(err)
 			case <-time.After(cfg.Interval):
 				index++
 

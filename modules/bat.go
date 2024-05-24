@@ -30,15 +30,11 @@ func bat(ch chan<- Message, cfg *batConfig) {
 		bats = make(map[string]batInfo)
 
 		batPaths, err = filepath.Glob("/sys/class/power_supply/BAT*")
-		if err != nil {
-			panic(err)
-		}
+		panicIf(err)
 
 		for _, v = range batPaths {
 			buf, err = os.ReadFile(v + "/status")
-			if err != nil {
-				panic(err)
-			}
+			panicIf(err)
 
 			bats[filepath.Base(v)] = batInfo{
 				Status:   string(buf[:len(buf)-1]),

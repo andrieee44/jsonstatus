@@ -25,14 +25,10 @@ func currentUser(ch chan<- Message, cfg *userConfig) {
 	}
 
 	currentUser, err = user.Current()
-	if err != nil {
-		panic(err)
-	}
+	panicIf(err)
 
 	host, err = os.Hostname()
-	if err != nil {
-		panic(err)
-	}
+	panicIf(err)
 
 	go onceMessage(ch, "User", cfg.Enable, marshalRawJson(jsonStruct{
 		UID:  currentUser.Uid,

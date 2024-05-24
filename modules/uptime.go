@@ -27,14 +27,10 @@ func uptime(ch chan<- Message, cfg *uptimeConfig) {
 		)
 
 		buf, err = os.ReadFile("/proc/uptime")
-		if err != nil {
-			panic(err)
-		}
+		panicIf(err)
 
 		uptime, err = strconv.ParseFloat(strings.Fields(string(buf))[0], 64)
-		if err != nil {
-			panic(err)
-		}
+		panicIf(err)
 
 		uptimeInt = int(uptime)
 

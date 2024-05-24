@@ -23,14 +23,7 @@ func bri(ch chan<- Message, cfg *briConfig) {
 	watcher = mkWatcher([]string{briPath})
 
 	go func() {
-		defer func() {
-			var err error
-
-			err = watcher.Close()
-			if err != nil {
-				panic(err)
-			}
-		}()
+		defer panicIf(watcher.Close())
 
 		for {
 			ch <- Message{

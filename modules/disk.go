@@ -25,17 +25,12 @@ func disk(ch chan<- Message, cfg *diskConfig) {
 			disks             map[string]diskStruct
 			v                 string
 			free, total, used int
-			err               error
 		)
 
 		disks = make(map[string]diskStruct)
 
 		for _, v = range cfg.Disks {
-			err = unix.Statfs(v, &statfs)
-			if err != nil {
-				panic(err)
-			}
-
+			panicIf(unix.Statfs(v, &statfs))
 			free = int(statfs.Bfree) * int(statfs.Bsize)
 			total = int(statfs.Blocks) * int(statfs.Bsize)
 			used = total - free

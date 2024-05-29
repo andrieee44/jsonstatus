@@ -80,6 +80,7 @@ func DefaultConfig() *Config {
 		Music: musicConfig{
 			Enable:   true,
 			Interval: time.Second,
+			Format:   "%AlbumArtist% - %Title%",
 		},
 
 		Vol: volConfig{

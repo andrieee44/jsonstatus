@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"regexp"
 	"time"
 
 	"github.com/fhs/gompd/v2/mpd"
@@ -9,18 +10,27 @@ import (
 type musicConfig struct {
 	Enable   bool
 	Interval time.Duration
+	Format   string
+}
+
+func musicFmt(regex *regexp.Regexp, music mpd.Attrs, format string) string {
+	return regex.ReplaceAllStringFunc(format, func(str string) string {
+		return music[str[1:len(str)-1]]
+	})
 }
 
 func music(ch chan<- Message, cfg *musicConfig) {
 	type jsonStruct struct {
-		Music, Status mpd.Attrs
-		Index         int
+		Music, State string
+		Index        int
 	}
 
 	var (
+		regex         *regexp.Regexp
 		client        *mpd.Client
 		watcher       *mpd.Watcher
 		music, status mpd.Attrs
+		musicStr      string
 		index         int
 		ok            bool
 		err           error
@@ -29,6 +39,8 @@ func music(ch chan<- Message, cfg *musicConfig) {
 	if !cfg.Enable {
 		return
 	}
+
+	regex = regexp.MustCompilePOSIX("%[A-Za-z]+%")
 
 	client, err = mpd.Dial("tcp", "127.0.0.1:6600")
 	panicIf(err)
@@ -49,12 +61,14 @@ func music(ch chan<- Message, cfg *musicConfig) {
 			status, err = client.Status()
 			panicIf(err)
 
+			musicStr = musicFmt(regex, music, cfg.Format)
+
 			ch <- Message{
 				Name: "Music",
 				Json: marshalRawJson(jsonStruct{
-					Music:  music,
-					Status: status,
-					Index:  index,
+					State: status["state"],
+					Music: musicStr,
+					Index: index,
 				}),
 			}
 
@@ -74,7 +88,7 @@ func music(ch chan<- Message, cfg *musicConfig) {
 			case <-time.After(cfg.Interval):
 				index++
 
-				if index < 0 {
+				if index >= len(musicStr) {
 					index = 0
 				}
 			}

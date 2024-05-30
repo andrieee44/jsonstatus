@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"net"
@@ -9,6 +10,11 @@ import (
 
 type hyprlandConfig struct {
 	Enable bool
+}
+
+type hyprlandWorkspace struct {
+	Id   int
+	Name string
 }
 
 func hyprlandSocketsPath() string {
@@ -27,42 +33,101 @@ func hyprlandSocketsPath() string {
 	return runtime + "/hypr/" + his + "/"
 }
 
-func hyprlandRequest(sock net.Conn, request string, v any) {
-	var (
-		err error
-	)
-
-	_, err = sock.Write([]byte("-j/" + request))
-	panicIf(err)
-
-	panicIf(json.NewDecoder(sock).Decode(v))
+func hyprlandEvent(scanner *bufio.Scanner) {
+	if !scanner.Scan() {
+		panicIf(scanner.Err())
+	}
 }
 
-func hyprlandWindow(sock net.Conn) string {
-	type jsonStruct struct {
+func hyprlandRequest(request string, v any) {
+	var (
+		query net.Conn
+		err   error
+	)
+
+	query, err = net.Dial("unix", hyprlandSocketsPath()+".socket.sock")
+	panicIf(err)
+
+	_, err = query.Write([]byte("-j/" + request))
+	panicIf(err)
+
+	panicIf(json.NewDecoder(query).Decode(v))
+	panicIf(query.Close())
+}
+
+func hyprlandWindow() string {
+	type window struct {
 		Title string
 	}
 
-	var window jsonStruct
+	var win window
 
-	window = jsonStruct{}
-	hyprlandRequest(sock, "activewindow", &window)
+	win = window{}
+	hyprlandRequest("activewindow", &win)
 
-	return window.Title
+	return win.Title
+}
+
+func hyprlandWorkspaces() []hyprlandWorkspace {
+	var workspaces []hyprlandWorkspace
+
+	hyprlandRequest("workspaces", &workspaces)
+
+	return workspaces
+}
+
+func hyprlandActive() int {
+	type monitor struct {
+		ActiveWorkspace struct {
+			Id int
+		}
+	}
+
+	var monitors []monitor
+
+	hyprlandRequest("monitors", &monitors)
+
+	return monitors[0].ActiveWorkspace.Id
 }
 
 func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 	var (
-		sock net.Conn
-		err  error
+		events  net.Conn
+		scanner *bufio.Scanner
+		err     error
 	)
 
 	if !cfg.Enable {
 		return
 	}
 
-	sock, err = net.Dial("unix", hyprlandSocketsPath()+".socket.sock")
+	events, err = net.Dial("unix", hyprlandSocketsPath()+".socket2.sock")
 	panicIf(err)
 
-	println(hyprlandWindow(sock))
+	scanner = bufio.NewScanner(events)
+
+	go func() {
+		type jsonStruct struct {
+			Active     int
+			Workspaces []hyprlandWorkspace
+			Window     string
+		}
+
+		defer func() {
+			panicIf(events.Close())
+		}()
+
+		for {
+			ch <- Message{
+				Name: "Hyprland",
+				Json: marshalRawJson(jsonStruct{
+					Active:     hyprlandActive(),
+					Workspaces: hyprlandWorkspaces(),
+					Window:     hyprlandWindow(),
+				}),
+			}
+
+			hyprlandEvent(scanner)
+		}
+	}()
 }

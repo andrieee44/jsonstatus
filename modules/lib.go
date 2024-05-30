@@ -13,17 +13,18 @@ import (
 )
 
 type Config struct {
-	Date   dateConfig
-	Ram    ramConfig
-	Swap   swapConfig
-	Cpu    cpuConfig
-	Bri    briConfig
-	Bat    batConfig
-	Music  musicConfig
-	Vol    volConfig
-	Uptime uptimeConfig
-	User   userConfig
-	Disk   diskConfig
+	Date     dateConfig
+	Ram      ramConfig
+	Swap     swapConfig
+	Cpu      cpuConfig
+	Bri      briConfig
+	Bat      batConfig
+	Music    musicConfig
+	Vol      volConfig
+	Uptime   uptimeConfig
+	User     userConfig
+	Disk     diskConfig
+	Hyprland hyprlandConfig
 }
 
 type Message struct {
@@ -43,6 +44,7 @@ func Run(ch chan<- Message, cfg *Config) {
 	uptime(ch, &cfg.Uptime)
 	currentUser(ch, &cfg.User)
 	disk(ch, &cfg.Disk)
+	hyprland(ch, &cfg.Hyprland)
 }
 
 func DefaultConfig() *Config {
@@ -109,6 +111,10 @@ func DefaultConfig() *Config {
 			Interval: time.Minute,
 			Disks:    []string{"/"},
 			Icons:    []string{" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"},
+		},
+
+		Hyprland: hyprlandConfig{
+			Enable: true,
 		},
 	}
 }

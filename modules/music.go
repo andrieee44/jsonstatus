@@ -20,11 +20,6 @@ func musicFmt(regex *regexp.Regexp, music mpd.Attrs, format string) string {
 }
 
 func music(ch chan<- Message, cfg *musicConfig) {
-	type jsonStruct struct {
-		Music, State string
-		Index        int
-	}
-
 	var (
 		regex         *regexp.Regexp
 		client        *mpd.Client
@@ -49,6 +44,11 @@ func music(ch chan<- Message, cfg *musicConfig) {
 	panicIf(err)
 
 	go func() {
+		type jsonStruct struct {
+			Music, State string
+			Index        int
+		}
+
 		defer func() {
 			panicIf(client.Close())
 			panicIf(watcher.Close())

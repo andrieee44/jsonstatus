@@ -13,12 +13,6 @@ type volConfig struct {
 }
 
 func vol(ch chan<- Message, cfg *volConfig) {
-	type jsonStruct struct {
-		Volume float64
-		Mute   bool
-		Icon   string
-	}
-
 	var (
 		client     *pulseaudio.Client
 		volume     float32
@@ -39,6 +33,12 @@ func vol(ch chan<- Message, cfg *volConfig) {
 	panicIf(err)
 
 	go func() {
+		type jsonStruct struct {
+			Volume float64
+			Mute   bool
+			Icon   string
+		}
+
 		defer client.Close()
 
 		for {

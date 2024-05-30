@@ -8,9 +8,9 @@ import (
 )
 
 type diskConfig struct {
-	Enable   bool
-	Interval time.Duration
-	Disks    []string
+	Enable       bool
+	Interval     time.Duration
+	Disks, Icons []string
 }
 
 func disk(ch chan<- Message, cfg *diskConfig) {
@@ -18,6 +18,7 @@ func disk(ch chan<- Message, cfg *diskConfig) {
 		type diskStruct struct {
 			Free, Total, Used int
 			UsedPerc          float64
+			Icon              string
 		}
 
 		var (
@@ -25,6 +26,7 @@ func disk(ch chan<- Message, cfg *diskConfig) {
 			disks             map[string]diskStruct
 			v                 string
 			free, total, used int
+			usedPerc          float64
 		)
 
 		disks = make(map[string]diskStruct)
@@ -34,12 +36,14 @@ func disk(ch chan<- Message, cfg *diskConfig) {
 			free = int(statfs.Bfree) * int(statfs.Bsize)
 			total = int(statfs.Blocks) * int(statfs.Bsize)
 			used = total - free
+			usedPerc = float64(used) / float64(total) * 100
 
 			disks[v] = diskStruct{
 				Free:     free,
 				Total:    total,
 				Used:     used,
-				UsedPerc: float64(used) / float64(total) * 100,
+				UsedPerc: usedPerc,
+				Icon:     icon(cfg.Icons, 100, usedPerc),
 			}
 		}
 

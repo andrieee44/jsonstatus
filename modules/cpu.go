@@ -86,7 +86,7 @@ func cpu(ch chan<- Message, cfg *cpuConfig) {
 		return marshalRawJson(jsonStruct{
 			Frequency:   cpuFreq(),
 			AveragePerc: perc,
-			Icon: icon(cfg.Icons, 100, perc),
+			Icon:        icon(cfg.Icons, 100, perc),
 		})
 	})
 }

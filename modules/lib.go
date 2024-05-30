@@ -108,6 +108,7 @@ func DefaultConfig() *Config {
 			Enable:   true,
 			Interval: time.Minute,
 			Disks:    []string{"/"},
+			Icons:    []string{" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"},
 		},
 	}
 }

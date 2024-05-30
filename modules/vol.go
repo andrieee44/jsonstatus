@@ -12,12 +12,32 @@ type volConfig struct {
 	Icons   []string
 }
 
+func volUpdates(updates <-chan struct{}, discard time.Duration) {
+	var ok bool
+
+	_, ok = <-updates
+	if !ok {
+		return
+	}
+
+	for {
+		select {
+		case _, ok = <-updates:
+			if !ok {
+				return
+			}
+		case <-time.After(discard):
+			return
+		}
+	}
+}
+
 func vol(ch chan<- Message, cfg *volConfig) {
 	var (
 		client     *pulseaudio.Client
 		volume     float32
 		volumePerc float64
-		mute, ok   bool
+		mute       bool
 		updates    <-chan struct{}
 		err        error
 	)
@@ -59,22 +79,7 @@ func vol(ch chan<- Message, cfg *volConfig) {
 				}),
 			}
 
-			_, ok = <-updates
-			if !ok {
-				return
-			}
-
-		DISCARD:
-			for {
-				select {
-				case _, ok = <-updates:
-					if !ok {
-						return
-					}
-				case <-time.After(cfg.Discard):
-					break DISCARD
-				}
-			}
+			volUpdates(updates, cfg.Discard)
 		}
 	}()
 }

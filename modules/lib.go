@@ -69,6 +69,7 @@ func DefaultConfig() *Config {
 		Cpu: cpuConfig{
 			Enable:   true,
 			Interval: time.Second,
+			Icons:    []string{" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"},
 		},
 
 		Bri: briConfig{

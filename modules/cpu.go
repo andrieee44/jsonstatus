@@ -12,6 +12,7 @@ import (
 type cpuConfig struct {
 	Enable   bool
 	Interval time.Duration
+	Icons    []string
 }
 
 type cpuSample struct {
@@ -75,6 +76,7 @@ func cpu(ch chan<- Message, cfg *cpuConfig) {
 		type jsonStruct struct {
 			Frequency   int
 			AveragePerc float64
+			Icon        string
 		}
 
 		var perc float64
@@ -84,6 +86,7 @@ func cpu(ch chan<- Message, cfg *cpuConfig) {
 		return marshalRawJson(jsonStruct{
 			Frequency:   cpuFreq(),
 			AveragePerc: perc,
+			Icon: icon(cfg.Icons, 100, perc),
 		})
 	})
 }

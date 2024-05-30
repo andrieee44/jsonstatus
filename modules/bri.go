@@ -31,7 +31,7 @@ func bri(ch chan<- Message, cfg *briConfig) {
 		}
 
 		defer func() {
-			panicIf(watcher.Close())
+			PanicIf(watcher.Close())
 		}()
 
 		for {

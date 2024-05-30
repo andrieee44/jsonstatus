@@ -33,11 +33,11 @@ func bat(ch chan<- Message, cfg *batConfig) {
 		bats = make(map[string]batInfo)
 
 		batPaths, err = filepath.Glob("/sys/class/power_supply/BAT*")
-		panicIf(err)
+		PanicIf(err)
 
 		for _, v = range batPaths {
 			buf, err = os.ReadFile(v + "/status")
-			panicIf(err)
+			PanicIf(err)
 
 			capacity = pathAtoi(v + "/capacity")
 

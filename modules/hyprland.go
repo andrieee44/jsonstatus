@@ -35,7 +35,7 @@ func hyprlandSocketsPath() string {
 
 func hyprlandEvent(scanner *bufio.Scanner) {
 	if !scanner.Scan() {
-		panicIf(scanner.Err())
+		PanicIf(scanner.Err())
 	}
 }
 
@@ -46,13 +46,13 @@ func hyprlandRequest(request string, v any) {
 	)
 
 	query, err = net.Dial("unix", hyprlandSocketsPath()+".socket.sock")
-	panicIf(err)
+	PanicIf(err)
 
 	_, err = query.Write([]byte("-j/" + request))
-	panicIf(err)
+	PanicIf(err)
 
-	panicIf(json.NewDecoder(query).Decode(v))
-	panicIf(query.Close())
+	PanicIf(json.NewDecoder(query).Decode(v))
+	PanicIf(query.Close())
 }
 
 func hyprlandWindow() string {
@@ -102,7 +102,7 @@ func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 	}
 
 	events, err = net.Dial("unix", hyprlandSocketsPath()+".socket2.sock")
-	panicIf(err)
+	PanicIf(err)
 
 	scanner = bufio.NewScanner(events)
 
@@ -114,7 +114,7 @@ func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 		}
 
 		defer func() {
-			panicIf(events.Close())
+			PanicIf(events.Close())
 		}()
 
 		for {

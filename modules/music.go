@@ -38,10 +38,10 @@ func music(ch chan<- Message, cfg *musicConfig) {
 	regex = regexp.MustCompilePOSIX("%[A-Za-z]+%")
 
 	client, err = mpd.Dial("tcp", "127.0.0.1:6600")
-	panicIf(err)
+	PanicIf(err)
 
 	watcher, err = mpd.NewWatcher("tcp", "127.0.0.1:6600", "", "player")
-	panicIf(err)
+	PanicIf(err)
 
 	go func() {
 		type jsonStruct struct {
@@ -50,16 +50,16 @@ func music(ch chan<- Message, cfg *musicConfig) {
 		}
 
 		defer func() {
-			panicIf(client.Close())
-			panicIf(watcher.Close())
+			PanicIf(client.Close())
+			PanicIf(watcher.Close())
 		}()
 
 		for {
 			music, err = client.CurrentSong()
-			panicIf(err)
+			PanicIf(err)
 
 			status, err = client.Status()
-			panicIf(err)
+			PanicIf(err)
 
 			musicStr = musicFmt(regex, music, cfg.Format)
 
@@ -84,7 +84,7 @@ func music(ch chan<- Message, cfg *musicConfig) {
 					return
 				}
 
-				panicIf(err)
+				PanicIf(err)
 			case <-time.After(cfg.Interval):
 				index++
 

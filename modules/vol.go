@@ -47,10 +47,10 @@ func vol(ch chan<- Message, cfg *volConfig) {
 	}
 
 	client, err = pulseaudio.NewClient()
-	panicIf(err)
+	PanicIf(err)
 
 	updates, err = client.Updates()
-	panicIf(err)
+	PanicIf(err)
 
 	go func() {
 		type jsonStruct struct {
@@ -63,10 +63,10 @@ func vol(ch chan<- Message, cfg *volConfig) {
 
 		for {
 			volume, err = client.Volume()
-			panicIf(err)
+			PanicIf(err)
 
 			mute, err = client.Mute()
-			panicIf(err)
+			PanicIf(err)
 
 			volumePerc = float64(volume) * 100
 

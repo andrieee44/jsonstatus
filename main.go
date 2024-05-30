@@ -37,24 +37,16 @@ func configFile() *os.File {
 
 	if len(os.Args) == 2 {
 		file, err = os.OpenFile(os.Args[1], os.O_RDONLY|os.O_CREATE, 0644)
-		if err != nil {
-			panic(err)
-		}
+		modules.PanicIf(err)
 
 		return file
 	}
 
 	dir = configDir()
-
-	err = os.MkdirAll(dir, 0755)
-	if err != nil {
-		panic(err)
-	}
+	modules.PanicIf(os.MkdirAll(dir, 0755))
 
 	file, err = os.OpenFile(dir+"/jsonfetch.toml", os.O_RDONLY|os.O_CREATE, 0644)
-	if err != nil {
-		panic(err)
-	}
+	modules.PanicIf(err)
 
 	return file
 }
@@ -70,14 +62,9 @@ func configToml() *modules.Config {
 	cfg = modules.DefaultConfig()
 
 	_, err = toml.NewDecoder(cfgFile).Decode(cfg)
-	if err != nil {
-		panic(err)
-	}
+	modules.PanicIf(err)
 
-	err = cfgFile.Close()
-	if err != nil {
-		panic(err)
-	}
+	modules.PanicIf(cfgFile.Close())
 
 	return cfg
 }
@@ -99,9 +86,7 @@ func main() {
 		msgMap[msg.Name] = msg.Json
 
 		jsonData, err = json.Marshal(msgMap)
-		if err != nil {
-			panic(err)
-		}
+		modules.PanicIf(err)
 
 		fmt.Println(string(jsonData))
 	}

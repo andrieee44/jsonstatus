@@ -32,7 +32,7 @@ func disk(ch chan<- Message, cfg *diskConfig) {
 		disks = make(map[string]diskStruct)
 
 		for _, v = range cfg.Disks {
-			panicIf(unix.Statfs(v, &statfs))
+			PanicIf(unix.Statfs(v, &statfs))
 			free = int(statfs.Bfree) * int(statfs.Bsize)
 			total = int(statfs.Blocks) * int(statfs.Bsize)
 			used = total - free

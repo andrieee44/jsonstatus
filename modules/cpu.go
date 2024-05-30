@@ -27,10 +27,10 @@ func cpuFreq() int {
 	)
 
 	buf, err = os.ReadFile("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq")
-	panicIf(err)
+	PanicIf(err)
 
 	freq, err = strconv.Atoi(string(buf[:len(buf)-1]))
-	panicIf(err)
+	PanicIf(err)
 
 	return freq
 }
@@ -46,15 +46,15 @@ func cpuAveragePerc(prev cpuSample) (cpuSample, float64) {
 	)
 
 	stat, err = os.Open("/proc/stat")
-	panicIf(err)
+	PanicIf(err)
 
 	scanner = bufio.NewScanner(stat)
 	scanner.Scan()
-	panicIf(scanner.Err())
+	PanicIf(scanner.Err())
 
 	for i, v = range strings.Fields(scanner.Text())[1:] {
 		num, err = strconv.Atoi(v)
-		panicIf(err)
+		PanicIf(err)
 
 		if i == 3 {
 			sample.idle = num
@@ -64,7 +64,7 @@ func cpuAveragePerc(prev cpuSample) (cpuSample, float64) {
 	}
 
 	delta = sample.sum - prev.sum
-	panicIf(stat.Close())
+	PanicIf(stat.Close())
 
 	return sample, float64(delta-(sample.idle-prev.idle)) / float64(delta) * 100
 }

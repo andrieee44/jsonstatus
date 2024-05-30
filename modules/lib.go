@@ -57,6 +57,7 @@ func DefaultConfig() *Config {
 		Ram: ramConfig{
 			Enable:   true,
 			Interval: time.Second,
+			Icons:    []string{" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"},
 		},
 
 		Swap: swapConfig{

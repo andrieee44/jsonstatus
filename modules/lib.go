@@ -76,6 +76,7 @@ func DefaultConfig() *Config {
 		Bat: batConfig{
 			Enable:   true,
 			Interval: time.Minute,
+			Icons:    []string{"", "", "", "", ""},
 		},
 
 		Music: musicConfig{

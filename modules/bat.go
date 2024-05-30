@@ -10,6 +10,7 @@ import (
 type batConfig struct {
 	Enable   bool
 	Interval time.Duration
+	Icons    []string
 }
 
 func bat(ch chan<- Message, cfg *batConfig) {
@@ -17,6 +18,7 @@ func bat(ch chan<- Message, cfg *batConfig) {
 		type batInfo struct {
 			Status   string
 			Capacity int
+			Icon     string
 		}
 
 		var (
@@ -24,6 +26,7 @@ func bat(ch chan<- Message, cfg *batConfig) {
 			batPaths []string
 			v        string
 			buf      []byte
+			capacity int
 			err      error
 		)
 
@@ -36,9 +39,12 @@ func bat(ch chan<- Message, cfg *batConfig) {
 			buf, err = os.ReadFile(v + "/status")
 			panicIf(err)
 
+			capacity = pathAtoi(v + "/capacity")
+
 			bats[filepath.Base(v)] = batInfo{
 				Status:   string(buf[:len(buf)-1]),
-				Capacity: pathAtoi(v + "/capacity"),
+				Capacity: capacity,
+				Icon:     icon(cfg.Icons, 100, float64(capacity)),
 			}
 		}
 

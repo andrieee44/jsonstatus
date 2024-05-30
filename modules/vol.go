@@ -65,11 +65,11 @@ func vol(ch chan<- Message, cfg *volConfig) {
 			volumePerc = float64(volume) * 100
 
 			sendMessage(ch, "Vol", marshalRawJson(struct {
-				Volume float64
+				Perc float64
 				Mute   bool
 				Icon   string
 			}{
-				Volume: volumePerc,
+				Perc: volumePerc,
 				Mute:   mute,
 				Icon:   icon(cfg.Icons, 100, volumePerc),
 			}))

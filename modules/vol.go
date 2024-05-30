@@ -7,21 +7,25 @@ import (
 )
 
 type volConfig struct {
-	Enable bool
+	Enable  bool
+	Discard time.Duration
+	Icons   []string
 }
 
 func vol(ch chan<- Message, cfg *volConfig) {
 	type jsonStruct struct {
 		Volume float64
 		Mute   bool
+		Icon   string
 	}
 
 	var (
-		client   *pulseaudio.Client
-		volume   float32
-		mute, ok bool
-		updates  <-chan struct{}
-		err      error
+		client     *pulseaudio.Client
+		volume     float32
+		volumePerc float64
+		mute, ok   bool
+		updates    <-chan struct{}
+		err        error
 	)
 
 	if !cfg.Enable {
@@ -44,11 +48,14 @@ func vol(ch chan<- Message, cfg *volConfig) {
 			mute, err = client.Mute()
 			panicIf(err)
 
+			volumePerc = float64(volume) * 100
+
 			ch <- Message{
 				Name: "Vol",
 				Json: marshalRawJson(jsonStruct{
-					Volume: float64(volume) * 100,
+					Volume: volumePerc,
 					Mute:   mute,
+					Icon:   icon(cfg.Icons, 100, volumePerc),
 				}),
 			}
 
@@ -64,7 +71,7 @@ func vol(ch chan<- Message, cfg *volConfig) {
 					if !ok {
 						return
 					}
-				case <-time.After(time.Millisecond * 10):
+				case <-time.After(cfg.Discard):
 					break DISCARD
 				}
 			}

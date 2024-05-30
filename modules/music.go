@@ -44,11 +44,6 @@ func music(ch chan<- Message, cfg *musicConfig) {
 	PanicIf(err)
 
 	go func() {
-		type jsonStruct struct {
-			Music, State string
-			Index        int
-		}
-
 		defer func() {
 			PanicIf(client.Close())
 			PanicIf(watcher.Close())
@@ -63,14 +58,14 @@ func music(ch chan<- Message, cfg *musicConfig) {
 
 			musicStr = musicFmt(regex, music, cfg.Format)
 
-			ch <- Message{
-				Name: "Music",
-				Json: marshalRawJson(jsonStruct{
-					State: status["state"],
-					Music: musicStr,
-					Index: index,
-				}),
-			}
+			sendMessage(ch, "Music", marshalRawJson(struct {
+				Music, State string
+				Index        int
+			}{
+				State: status["state"],
+				Music: musicStr,
+				Index: index,
+			}))
 
 			select {
 			case _, ok = <-watcher.Event:

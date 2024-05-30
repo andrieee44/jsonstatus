@@ -13,12 +13,6 @@ type swapConfig struct {
 
 func swap(ch chan<- Message, cfg *swapConfig) {
 	go loopMessage(ch, "Swap", cfg.Enable, cfg.Interval, func() json.RawMessage {
-		type jsonStruct struct {
-			Total, Free, Used int
-			UsedPerc          float64
-			Icon              string
-		}
-
 		var (
 			meminfo                   map[string]int
 			total, free, cached, used int
@@ -35,7 +29,11 @@ func swap(ch chan<- Message, cfg *swapConfig) {
 		used = total - free + cached
 		usedPerc = float64(used) / float64(total) * 100
 
-		return marshalRawJson(jsonStruct{
+		return marshalRawJson(struct {
+			Total, Free, Used int
+			UsedPerc          float64
+			Icon              string
+		}{
 			Total:    total,
 			Free:     free,
 			Used:     used,

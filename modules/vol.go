@@ -12,7 +12,7 @@ type volConfig struct {
 	Icons   []string
 }
 
-func volUpdates(updates <-chan struct{}, discard time.Duration) {
+func volDiscardUpdates(updates <-chan struct{}, discard time.Duration) {
 	var ok bool
 
 	_, ok = <-updates
@@ -53,12 +53,6 @@ func vol(ch chan<- Message, cfg *volConfig) {
 	PanicIf(err)
 
 	go func() {
-		type jsonStruct struct {
-			Volume float64
-			Mute   bool
-			Icon   string
-		}
-
 		defer client.Close()
 
 		for {
@@ -70,16 +64,17 @@ func vol(ch chan<- Message, cfg *volConfig) {
 
 			volumePerc = float64(volume) * 100
 
-			ch <- Message{
-				Name: "Vol",
-				Json: marshalRawJson(jsonStruct{
-					Volume: volumePerc,
-					Mute:   mute,
-					Icon:   icon(cfg.Icons, 100, volumePerc),
-				}),
-			}
+			sendMessage(ch, "Vol", marshalRawJson(struct {
+				Volume float64
+				Mute   bool
+				Icon   string
+			}{
+				Volume: volumePerc,
+				Mute:   mute,
+				Icon:   icon(cfg.Icons, 100, volumePerc),
+			}))
 
-			volUpdates(updates, cfg.Discard)
+			volDiscardUpdates(updates, cfg.Discard)
 		}
 	}()
 }

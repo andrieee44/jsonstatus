@@ -73,17 +73,15 @@ func cpu(ch chan<- Message, cfg *cpuConfig) {
 	var prev cpuSample
 
 	go loopMessage(ch, "Cpu", cfg.Enable, cfg.Interval, func() json.RawMessage {
-		type jsonStruct struct {
-			Frequency   int
-			AveragePerc float64
-			Icon        string
-		}
-
 		var perc float64
 
 		prev, perc = cpuAveragePerc(prev)
 
-		return marshalRawJson(jsonStruct{
+		return marshalRawJson(struct {
+			Frequency   int
+			AveragePerc float64
+			Icon        string
+		}{
 			Frequency:   cpuFreq(),
 			AveragePerc: perc,
 			Icon:        icon(cfg.Icons, 100, perc),

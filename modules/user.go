@@ -10,10 +10,6 @@ type userConfig struct {
 }
 
 func currentUser(ch chan<- Message, cfg *userConfig) {
-	type jsonStruct struct {
-		UID, GID, Name, Host string
-	}
-
 	var (
 		currentUser *user.User
 		host        string
@@ -30,7 +26,9 @@ func currentUser(ch chan<- Message, cfg *userConfig) {
 	host, err = os.Hostname()
 	PanicIf(err)
 
-	go onceMessage(ch, "User", cfg.Enable, marshalRawJson(jsonStruct{
+	go onceMessage(ch, "User", cfg.Enable, marshalRawJson(struct {
+		UID, GID, Name, Host string
+	}{
 		UID:  currentUser.Uid,
 		GID:  currentUser.Gid,
 		Name: currentUser.Username,

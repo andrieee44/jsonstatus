@@ -15,10 +15,6 @@ type uptimeConfig struct {
 
 func uptime(ch chan<- Message, cfg *uptimeConfig) {
 	go loopMessage(ch, "Uptime", cfg.Enable, cfg.Interval, func() json.RawMessage {
-		type jsonStruct struct {
-			Hours, Minutes, Seconds int
-		}
-
 		var (
 			buf       []byte
 			uptime    float64
@@ -34,7 +30,9 @@ func uptime(ch chan<- Message, cfg *uptimeConfig) {
 
 		uptimeInt = int(uptime)
 
-		return marshalRawJson(jsonStruct{
+		return marshalRawJson(struct {
+			Hours, Minutes, Seconds int
+		}{
 			Hours:   uptimeInt / 3600,
 			Minutes: (uptimeInt % 3600) / 60,
 			Seconds: uptimeInt % 60,

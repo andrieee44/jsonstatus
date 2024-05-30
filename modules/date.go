@@ -14,10 +14,6 @@ type dateConfig struct {
 
 func date(ch chan<- Message, cfg *dateConfig) {
 	go loopMessage(ch, "Date", cfg.Enable, cfg.Interval, func() json.RawMessage {
-		type jsonStruct struct {
-			Icon, Date string
-		}
-
 		var (
 			date time.Time
 			hour int
@@ -30,7 +26,9 @@ func date(ch chan<- Message, cfg *dateConfig) {
 			hour -= 12
 		}
 
-		return marshalRawJson(jsonStruct{
+		return marshalRawJson(struct {
+			Icon, Date string
+		}{
 			Icon: icon(cfg.Icons, 12, float64(hour-1)),
 			Date: date.Format(cfg.Format),
 		})

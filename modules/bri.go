@@ -25,11 +25,6 @@ func bri(ch chan<- Message, cfg *briConfig) {
 	go func() {
 		var perc float64
 
-		type jsonStruct struct {
-			Perc float64
-			Icon string
-		}
-
 		defer func() {
 			PanicIf(watcher.Close())
 		}()
@@ -37,13 +32,13 @@ func bri(ch chan<- Message, cfg *briConfig) {
 		for {
 			perc = float64(pathAtoi(briPath)) / float64(maxBri) * 100
 
-			ch <- Message{
-				Name: "Bri",
-				Json: marshalRawJson(jsonStruct{
-					Perc: perc,
-					Icon: icon(cfg.Icons, 100, perc),
-				}),
-			}
+			sendMessage(ch, "Bri", marshalRawJson(struct {
+				Perc float64
+				Icon string
+			}{
+				Perc: perc,
+				Icon: icon(cfg.Icons, 100, perc),
+			}))
 
 			notifyWatcher(watcher, func(event fsnotify.Event) bool {
 				return event.Has(fsnotify.Write)

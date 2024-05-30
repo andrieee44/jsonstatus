@@ -13,12 +13,6 @@ type ramConfig struct {
 
 func ram(ch chan<- Message, cfg *ramConfig) {
 	go loopMessage(ch, "Ram", cfg.Enable, cfg.Interval, func() json.RawMessage {
-		type jsonStruct struct {
-			Total, Free, Available, Used int
-			UsedPerc                     float64
-			Icon                         string
-		}
-
 		var (
 			meminfo  map[string]int
 			used     int
@@ -36,7 +30,11 @@ func ram(ch chan<- Message, cfg *ramConfig) {
 		used = meminfo["MemTotal"] - meminfo["MemFree"] - meminfo["Buffers"] - meminfo["Cached"]
 		usedPerc = float64(used) / float64(meminfo["MemTotal"]) * 100
 
-		return marshalRawJson(jsonStruct{
+		return marshalRawJson(struct {
+			Total, Free, Available, Used int
+			UsedPerc                     float64
+			Icon                         string
+		}{
 			Total:     meminfo["MemTotal"],
 			Free:      meminfo["MemFree"],
 			Available: meminfo["MemAvailable"],

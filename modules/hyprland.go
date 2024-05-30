@@ -107,25 +107,20 @@ func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 	scanner = bufio.NewScanner(events)
 
 	go func() {
-		type jsonStruct struct {
-			Active     int
-			Workspaces []hyprlandWorkspace
-			Window     string
-		}
-
 		defer func() {
 			PanicIf(events.Close())
 		}()
 
 		for {
-			ch <- Message{
-				Name: "Hyprland",
-				Json: marshalRawJson(jsonStruct{
-					Active:     hyprlandActive(),
-					Workspaces: hyprlandWorkspaces(),
-					Window:     hyprlandWindow(),
-				}),
-			}
+			sendMessage(ch, "Hyprland", marshalRawJson(struct {
+				Active     int
+				Workspaces []hyprlandWorkspace
+				Window     string
+			}{
+				Active:     hyprlandActive(),
+				Workspaces: hyprlandWorkspaces(),
+				Window:     hyprlandWindow(),
+			}))
 
 			hyprlandEvent(scanner)
 		}

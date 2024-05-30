@@ -63,6 +63,7 @@ func DefaultConfig() *Config {
 		Swap: swapConfig{
 			Enable:   true,
 			Interval: time.Second,
+			Icons:    []string{" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"},
 		},
 
 		Cpu: cpuConfig{

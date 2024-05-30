@@ -8,6 +8,7 @@ import (
 type swapConfig struct {
 	Enable   bool
 	Interval time.Duration
+	Icons    []string
 }
 
 func swap(ch chan<- Message, cfg *swapConfig) {
@@ -15,11 +16,13 @@ func swap(ch chan<- Message, cfg *swapConfig) {
 		type jsonStruct struct {
 			Total, Free, Used int
 			UsedPerc          float64
+			Icon              string
 		}
 
 		var (
 			meminfo                   map[string]int
 			total, free, cached, used int
+			usedPerc                  float64
 		)
 
 		meminfo = meminfoMap([]string{
@@ -30,12 +33,14 @@ func swap(ch chan<- Message, cfg *swapConfig) {
 
 		total, free, cached = meminfo["SwapTotal"], meminfo["SwapFree"], meminfo["SwapCached"]
 		used = total - free + cached
+		usedPerc = float64(used) / float64(total) * 100
 
 		return marshalRawJson(jsonStruct{
 			Total:    total,
 			Free:     free,
 			Used:     used,
-			UsedPerc: float64(used) / float64(total) * 100,
+			UsedPerc: usedPerc,
+			Icon:     icon(cfg.Icons, 100, usedPerc),
 		})
 	})
 }

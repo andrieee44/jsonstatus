@@ -51,6 +51,7 @@ func DefaultConfig() *Config {
 			Enable:   true,
 			Interval: time.Minute,
 			Format:   "Jan _2 2006 (Mon) 3:04 PM",
+			Icons:    []string{"󱐿", "󱑀", "󱑁", "󱑂", "󱑃", "󱑄", "󱑅", "󱑆", "󱑇", "󱑈", "󱑉", "󱑊"},
 		},
 
 		Ram: ramConfig{
@@ -107,6 +108,22 @@ func DefaultConfig() *Config {
 func panicIf(err error) {
 	if err != nil {
 		log.Panic(err)
+	}
+}
+
+func icon(icons []string, max, val float64) string {
+	var index, iconsLen int
+
+	iconsLen = len(icons)
+	index = int(float64(iconsLen) / max * val)
+
+	switch {
+	case iconsLen == 0:
+		return ""
+	case index >= iconsLen:
+		return icons[iconsLen-1]
+	default:
+		return icons[index]
 	}
 }
 

@@ -14,12 +14,11 @@ func bri(ch chan<- Message, cfg *briConfig) {
 		maxBri  int
 	)
 
-	maxBri = pathAtoi("/sys/class/backlight/intel_backlight/max_brightness")
-
 	if !cfg.Enable {
 		return
 	}
 
+	maxBri = pathAtoi("/sys/class/backlight/intel_backlight/max_brightness")
 	watcher = mkWatcher([]string{briPath})
 
 	go func() {

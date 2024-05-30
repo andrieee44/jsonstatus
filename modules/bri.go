@@ -4,6 +4,7 @@ import "github.com/fsnotify/fsnotify"
 
 type briConfig struct {
 	Enable bool
+	Icons  []string
 }
 
 func bri(ch chan<- Message, cfg *briConfig) {
@@ -22,12 +23,26 @@ func bri(ch chan<- Message, cfg *briConfig) {
 	watcher = mkWatcher([]string{briPath})
 
 	go func() {
-		defer panicIf(watcher.Close())
+		var perc float64
+
+		type jsonStruct struct {
+			Perc float64
+			Icon string
+		}
+
+		defer func() {
+			panicIf(watcher.Close())
+		}()
 
 		for {
+			perc = float64(pathAtoi(briPath)) / float64(maxBri) * 100
+
 			ch <- Message{
 				Name: "Bri",
-				Json: marshalRawJson(float64(pathAtoi(briPath)) / float64(maxBri) * 100),
+				Json: marshalRawJson(jsonStruct{
+					Perc: perc,
+					Icon: icon(cfg.Icons, 100, perc),
+				}),
 			}
 
 			notifyWatcher(watcher, func(event fsnotify.Event) bool {

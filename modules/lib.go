@@ -71,6 +71,7 @@ func DefaultConfig() *Config {
 
 		Bri: briConfig{
 			Enable: true,
+			Icons:  []string{"󰃞", "󰃟", "󰃝", "󰃠"},
 		},
 
 		Bat: batConfig{

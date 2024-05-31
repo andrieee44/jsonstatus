@@ -11,7 +11,7 @@ import (
 )
 
 func configDir() string {
-	const dirname string = "/jsonfetch"
+	const dirname string = "/jsonstatus"
 
 	var dir string
 
@@ -45,7 +45,7 @@ func configFile() *os.File {
 	dir = configDir()
 	modules.PanicIf(os.MkdirAll(dir, 0755))
 
-	file, err = os.OpenFile(dir+"/jsonfetch.toml", os.O_RDONLY|os.O_CREATE, 0644)
+	file, err = os.OpenFile(dir+"/jsonstatus.toml", os.O_RDONLY|os.O_CREATE, 0644)
 	modules.PanicIf(err)
 
 	return file

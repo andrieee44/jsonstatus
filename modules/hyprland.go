@@ -4,12 +4,16 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"os"
+	"time"
 )
 
 type hyprlandConfig struct {
-	Enable bool
+	Enable   bool
+	Interval time.Duration
+	Limit    int
 }
 
 type hyprlandWorkspace struct {
@@ -33,19 +37,68 @@ func hyprlandSocketsPath() string {
 	return runtime + "/hypr/" + his + "/"
 }
 
-func hyprlandEvent(scanner *bufio.Scanner) {
-	if !scanner.Scan() {
-		PanicIf(scanner.Err())
+func hyprlandEventChan(path string) (<-chan string, net.Conn) {
+	var (
+		events     net.Conn
+		eventsChan chan string
+		scanner    *bufio.Scanner
+		err        error
+	)
+
+	events, err = net.Dial("unix", path+".socket2.sock")
+	PanicIf(err)
+
+	eventsChan = make(chan string)
+	scanner = bufio.NewScanner(events)
+
+	go func() {
+		for {
+			if !scanner.Scan() {
+				PanicIf(scanner.Err())
+				return
+			}
+
+			eventsChan <- scanner.Text()
+		}
+	}()
+
+	return eventsChan, events
+}
+
+func hyprlandEvent(eventsChan <-chan string, interval time.Duration, window string, limit, index int) (int, bool) {
+	var (
+		timer <-chan time.Time
+		ok    bool
+	)
+
+	if limit != 0 && interval != 0 && len(window) > limit {
+		timer = time.After(interval)
+	}
+
+	for {
+		select {
+		case _, ok = <-eventsChan:
+			IsChanClosed(ok)
+			return 0, false
+		case <-timer:
+			index++
+
+			if index > len(window)-limit {
+				index = 0
+			}
+
+			return index, true
+		}
 	}
 }
 
-func hyprlandRequest(request string, v any) {
+func hyprlandRequest(path, request string, v any) {
 	var (
 		query net.Conn
 		err   error
 	)
 
-	query, err = net.Dial("unix", hyprlandSocketsPath()+".socket.sock")
+	query, err = net.Dial("unix", path+".socket.sock")
 	PanicIf(err)
 
 	_, err = query.Write([]byte("-j/" + request))
@@ -55,7 +108,7 @@ func hyprlandRequest(request string, v any) {
 	PanicIf(query.Close())
 }
 
-func hyprlandWindow() string {
+func hyprlandWindow(path string) string {
 	type window struct {
 		Title string
 	}
@@ -63,20 +116,21 @@ func hyprlandWindow() string {
 	var win window
 
 	win = window{}
-	hyprlandRequest("activewindow", &win)
+	hyprlandRequest(path, "activewindow", &win)
 
+	fmt.Fprintf(os.Stderr, "%q, %d\n", win.Title, len(win.Title))
 	return win.Title
 }
 
-func hyprlandWorkspaces() []hyprlandWorkspace {
+func hyprlandWorkspaces(path string) []hyprlandWorkspace {
 	var workspaces []hyprlandWorkspace
 
-	hyprlandRequest("workspaces", &workspaces)
+	hyprlandRequest(path, "workspaces", &workspaces)
 
 	return workspaces
 }
 
-func hyprlandActive() int {
+func hyprlandActive(path string) int {
 	type monitor struct {
 		ActiveWorkspace struct {
 			Id int
@@ -85,7 +139,7 @@ func hyprlandActive() int {
 
 	var monitors []monitor
 
-	hyprlandRequest("monitors", &monitors)
+	hyprlandRequest(path, "monitors", &monitors)
 
 	return monitors[0].ActiveWorkspace.Id
 }
@@ -97,32 +151,37 @@ func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 
 	go func() {
 		var (
-			events  net.Conn
-			scanner *bufio.Scanner
-			err     error
+			path, window string
+			events       net.Conn
+			eventsChan   <-chan string
+			index        int
+			unchanged    bool
 		)
 
-		events, err = net.Dial("unix", hyprlandSocketsPath()+".socket2.sock")
-		PanicIf(err)
-
-		scanner = bufio.NewScanner(events)
+		path = hyprlandSocketsPath()
+		eventsChan, events = hyprlandEventChan(path)
 
 		defer func() {
 			PanicIf(events.Close())
 		}()
 
 		for {
+			if !unchanged {
+				window = hyprlandWindow(path)
+			}
+
 			sendMessage(ch, "Hyprland", marshalRawJson(struct {
-				Active     int
-				Workspaces []hyprlandWorkspace
-				Window     string
+				Active, Index int
+				Workspaces    []hyprlandWorkspace
+				Window        string
 			}{
-				Active:     hyprlandActive(),
-				Workspaces: hyprlandWorkspaces(),
-				Window:     hyprlandWindow(),
+				Active:     hyprlandActive(path),
+				Index:      index,
+				Workspaces: hyprlandWorkspaces(path),
+				Window:     window,
 			}))
 
-			hyprlandEvent(scanner)
+			index, unchanged = hyprlandEvent(eventsChan, cfg.Interval, window, cfg.Limit, index)
 		}
 	}()
 }

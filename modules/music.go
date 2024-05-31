@@ -44,7 +44,7 @@ func musicEvent(watcher *mpd.Watcher, interval time.Duration, music string, limi
 		err   error
 	)
 
-	if interval != 0 && len(music) > limit {
+	if limit != 0 && interval != 0 && len(music) > limit {
 		timer = time.After(interval)
 	}
 

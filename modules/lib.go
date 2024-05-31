@@ -119,6 +119,8 @@ func DefaultConfig() *Config {
 
 		Hyprland: hyprlandConfig{
 			Enable: true,
+			Interval: time.Second,
+			Limit:    20,
 		},
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net"
 	"os"
 	"time"
@@ -118,7 +117,6 @@ func hyprlandWindow(path string) string {
 	win = window{}
 	hyprlandRequest(path, "activewindow", &win)
 
-	fmt.Fprintf(os.Stderr, "%q, %d\n", win.Title, len(win.Title))
 	return win.Title
 }
 

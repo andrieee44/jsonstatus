@@ -16,16 +16,12 @@ func volDiscardUpdates(updates <-chan struct{}, discard time.Duration) {
 	var ok bool
 
 	_, ok = <-updates
-	if !ok {
-		return
-	}
+	IsChanClosed(ok)
 
 	for {
 		select {
 		case _, ok = <-updates:
-			if !ok {
-				return
-			}
+			IsChanClosed(ok)
 		case <-time.After(discard):
 			return
 		}
@@ -33,26 +29,26 @@ func volDiscardUpdates(updates <-chan struct{}, discard time.Duration) {
 }
 
 func vol(ch chan<- Message, cfg *volConfig) {
-	var (
-		client     *pulseaudio.Client
-		volume     float32
-		volumePerc float64
-		mute       bool
-		updates    <-chan struct{}
-		err        error
-	)
-
 	if !cfg.Enable {
 		return
 	}
 
-	client, err = pulseaudio.NewClient()
-	PanicIf(err)
-
-	updates, err = client.Updates()
-	PanicIf(err)
-
 	go func() {
+		var (
+			client     *pulseaudio.Client
+			volume     float32
+			volumePerc float64
+			mute       bool
+			updates    <-chan struct{}
+			err        error
+		)
+
+		client, err = pulseaudio.NewClient()
+		PanicIf(err)
+
+		updates, err = client.Updates()
+		PanicIf(err)
+
 		defer client.Close()
 
 		for {
@@ -66,12 +62,12 @@ func vol(ch chan<- Message, cfg *volConfig) {
 
 			sendMessage(ch, "Vol", marshalRawJson(struct {
 				Perc float64
-				Mute   bool
-				Icon   string
+				Mute bool
+				Icon string
 			}{
 				Perc: volumePerc,
-				Mute:   mute,
-				Icon:   icon(cfg.Icons, 100, volumePerc),
+				Mute: mute,
+				Icon: icon(cfg.Icons, 100, volumePerc),
 			}))
 
 			volDiscardUpdates(updates, cfg.Discard)

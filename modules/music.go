@@ -11,82 +11,98 @@ type musicConfig struct {
 	Enable   bool
 	Interval time.Duration
 	Format   string
+	Limit    int
 }
 
-func musicFmt(regex *regexp.Regexp, music mpd.Attrs, format string) string {
-	return regex.ReplaceAllStringFunc(format, func(str string) string {
-		return music[str[1:len(str)-1]]
-	})
-}
-
-func music(ch chan<- Message, cfg *musicConfig) {
+func musicGet(format string) (string, string) {
 	var (
-		regex         *regexp.Regexp
 		client        *mpd.Client
-		watcher       *mpd.Watcher
 		music, status mpd.Attrs
-		musicStr      string
-		index         int
-		ok            bool
 		err           error
 	)
-
-	if !cfg.Enable {
-		return
-	}
-
-	regex = regexp.MustCompilePOSIX("%[A-Za-z]+%")
 
 	client, err = mpd.Dial("tcp", "127.0.0.1:6600")
 	PanicIf(err)
 
-	watcher, err = mpd.NewWatcher("tcp", "127.0.0.1:6600", "", "player")
+	music, err = client.CurrentSong()
 	PanicIf(err)
 
+	status, err = client.Status()
+	PanicIf(err)
+
+	PanicIf(client.Close())
+
+	return regexp.MustCompilePOSIX("%[A-Za-z]+%").ReplaceAllStringFunc(format, func(str string) string {
+		return music[str[1:len(str)-1]]
+	}), status["state"]
+}
+
+func musicEvent(watcher *mpd.Watcher, interval time.Duration, music string, limit, index int) (int, bool) {
+	var (
+		timer <-chan time.Time
+		ok    bool
+		err   error
+	)
+
+	if interval != 0 && len(music) > limit {
+		timer = time.After(interval)
+	}
+
+	select {
+	case _, ok = <-watcher.Event:
+		IsChanClosed(ok)
+
+		return 0, false
+	case err, ok = <-watcher.Error:
+		IsChanClosed(ok)
+		PanicIf(err)
+	case <-timer:
+		index++
+
+		if index >= len(music)-limit {
+			return 0, true
+		}
+	}
+
+	return index, true
+}
+
+func music(ch chan<- Message, cfg *musicConfig) {
+	if !cfg.Enable {
+		return
+	}
+
 	go func() {
+		var (
+			watcher      *mpd.Watcher
+			music, state string
+			index        int
+			unchanged    bool
+			err          error
+		)
+
+		watcher, err = mpd.NewWatcher("tcp", "127.0.0.1:6600", "", "player")
+		PanicIf(err)
+
 		defer func() {
-			PanicIf(client.Close())
 			PanicIf(watcher.Close())
 		}()
 
 		for {
-			music, err = client.CurrentSong()
-			PanicIf(err)
-
-			status, err = client.Status()
-			PanicIf(err)
-
-			musicStr = musicFmt(regex, music, cfg.Format)
+			if !unchanged {
+				music, state = musicGet(cfg.Format)
+			}
 
 			sendMessage(ch, "Music", marshalRawJson(struct {
 				Music, State string
 				Index        int
 			}{
-				State: status["state"],
-				Music: musicStr,
+				Music: music,
+				State: state,
 				Index: index,
 			}))
 
-			select {
-			case _, ok = <-watcher.Event:
-				if !ok {
-					return
-				}
-
-				index = 0
-			case err, ok = <-watcher.Error:
-				if !ok {
-					return
-				}
-
-				PanicIf(err)
-			case <-time.After(cfg.Interval):
-				index++
-
-				if index >= len(musicStr) {
-					index = 0
-				}
-			}
+			index, unchanged = musicEvent(watcher, cfg.Interval, music, cfg.Limit, index)
 		}
 	}()
 }

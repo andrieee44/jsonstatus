@@ -8,22 +8,21 @@ type briConfig struct {
 }
 
 func bri(ch chan<- Message, cfg *briConfig) {
-	const briPath string = "/sys/class/backlight/intel_backlight/brightness"
-
-	var (
-		watcher *fsnotify.Watcher
-		maxBri  int
-	)
-
 	if !cfg.Enable {
 		return
 	}
 
-	maxBri = pathAtoi("/sys/class/backlight/intel_backlight/max_brightness")
-	watcher = mkWatcher([]string{briPath})
-
 	go func() {
-		var perc float64
+		const briPath string = "/sys/class/backlight/intel_backlight/brightness"
+
+		var (
+			watcher *fsnotify.Watcher
+			maxBri  int
+			perc    float64
+		)
+
+		maxBri = pathAtoi("/sys/class/backlight/intel_backlight/max_brightness")
+		watcher = mkWatcher([]string{briPath})
 
 		defer func() {
 			PanicIf(watcher.Close())

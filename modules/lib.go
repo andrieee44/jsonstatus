@@ -3,6 +3,7 @@ package modules
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
 	"strconv"
@@ -31,6 +32,8 @@ type Message struct {
 	Name string
 	Json json.RawMessage
 }
+
+var errChanClosed = errors.New("channel closed unexpectedly")
 
 func Run(ch chan<- Message, cfg *Config) {
 	date(ch, &cfg.Date)
@@ -89,6 +92,7 @@ func DefaultConfig() *Config {
 			Enable:   true,
 			Interval: time.Second,
 			Format:   "%AlbumArtist% - %Title%",
+			Limit:    20,
 		},
 
 		Vol: volConfig{
@@ -122,6 +126,12 @@ func DefaultConfig() *Config {
 func PanicIf(err error) {
 	if err != nil {
 		log.Panic(err)
+	}
+}
+
+func IsChanClosed(ok bool) {
+	if !ok {
+		log.Panic(errChanClosed)
 	}
 }
 
@@ -168,14 +178,13 @@ func notifyWatcher(watcher *fsnotify.Watcher, handler func(fsnotify.Event) bool)
 	for {
 		select {
 		case event, ok = <-watcher.Events:
-			if !ok || handler(event) {
+			IsChanClosed(ok)
+
+			if handler(event) {
 				return
 			}
 		case err, ok = <-watcher.Errors:
-			if !ok {
-				return
-			}
-
+			IsChanClosed(ok)
 			PanicIf(err)
 		}
 	}

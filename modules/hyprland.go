@@ -91,22 +91,22 @@ func hyprlandActive() int {
 }
 
 func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
-	var (
-		events  net.Conn
-		scanner *bufio.Scanner
-		err     error
-	)
-
 	if !cfg.Enable {
 		return
 	}
 
-	events, err = net.Dial("unix", hyprlandSocketsPath()+".socket2.sock")
-	PanicIf(err)
-
-	scanner = bufio.NewScanner(events)
-
 	go func() {
+		var (
+			events  net.Conn
+			scanner *bufio.Scanner
+			err     error
+		)
+
+		events, err = net.Dial("unix", hyprlandSocketsPath()+".socket2.sock")
+		PanicIf(err)
+
+		scanner = bufio.NewScanner(events)
+
 		defer func() {
 			PanicIf(events.Close())
 		}()

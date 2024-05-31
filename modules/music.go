@@ -59,7 +59,7 @@ func musicEvent(watcher *mpd.Watcher, interval time.Duration, music string, limi
 	case <-timer:
 		index++
 
-		if index >= len(music)-limit {
+		if index > len(music)-limit {
 			return 0, true
 		}
 	}

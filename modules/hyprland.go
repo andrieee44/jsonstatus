@@ -103,55 +103,40 @@ func hyprlandEvent(eventsChan <-chan string, interval time.Duration, window stri
 	}
 }
 
-func hyprlandRequest(path, request string, v any) {
-	var (
-		query net.Conn
-		err   error
-	)
-
-	query, err = net.Dial("unix", path+".socket.sock")
-	PanicIf(err)
-
-	_, err = query.Write([]byte("-j/" + request))
-	PanicIf(err)
-
-	PanicIf(json.NewDecoder(query).Decode(v))
-	PanicIf(query.Close())
-}
-
-func hyprlandWindow(path string) string {
+func hyprlandRequest(path string) (string, []hyprlandWorkspace, int) {
 	type window struct {
 		Title string
 	}
 
-	var win window
-
-	win = window{}
-	hyprlandRequest(path, "activewindow", &win)
-
-	return win.Title
-}
-
-func hyprlandWorkspaces(path string) []hyprlandWorkspace {
-	var workspaces []hyprlandWorkspace
-
-	hyprlandRequest(path, "workspaces", &workspaces)
-
-	return workspaces
-}
-
-func hyprlandActive(path string) int {
 	type monitor struct {
 		ActiveWorkspace struct {
 			Id int
 		}
 	}
 
-	var monitors []monitor
+	var (
+		query      net.Conn
+		decoder    *json.Decoder
+		win        window
+		workspaces []hyprlandWorkspace
+		monitors   []monitor
+		err        error
+	)
 
-	hyprlandRequest(path, "monitors", &monitors)
+	query, err = net.Dial("unix", path+".socket.sock")
+	PanicIf(err)
 
-	return monitors[0].ActiveWorkspace.Id
+	_, err = query.Write([]byte("[[BATCH]]j/activewindow;j/workspaces;j/monitors"))
+	PanicIf(err)
+
+	decoder = json.NewDecoder(query)
+	PanicIf(decoder.Decode(&win))
+	PanicIf(decoder.Decode(&workspaces))
+	PanicIf(decoder.Decode(&monitors))
+
+	PanicIf(query.Close())
+
+	return win.Title, workspaces, monitors[0].ActiveWorkspace.Id
 }
 
 func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
@@ -161,11 +146,12 @@ func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 
 	go func() {
 		var (
-			path, window string
-			events       net.Conn
-			eventsChan   <-chan string
-			index        int
-			unchanged    bool
+			path, window  string
+			events        net.Conn
+			eventsChan    <-chan string
+			workspaces    []hyprlandWorkspace
+			active, index int
+			unchanged     bool
 		)
 
 		path = hyprlandSocketsPath()
@@ -177,18 +163,18 @@ func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 
 		for {
 			if !unchanged {
-				window = hyprlandWindow(path)
+				window, workspaces, active = hyprlandRequest(path)
 			}
 
 			sendMessage(ch, "Hyprland", marshalRawJson(struct {
-				Active, Index int
-				Workspaces    []hyprlandWorkspace
 				Window        string
+				Workspaces    []hyprlandWorkspace
+				Active, Index int
 			}{
-				Active:     hyprlandActive(path),
-				Index:      index,
-				Workspaces: hyprlandWorkspaces(path),
 				Window:     window,
+				Workspaces: workspaces,
+				Active:     active,
+				Index:      index,
 			}))
 
 			index, unchanged = hyprlandEvent(eventsChan, cfg.Interval, window, cfg.Limit, index)

@@ -29,7 +29,7 @@ func date(ch chan<- Message, cfg *dateConfig) {
 		return marshalRawJson(struct {
 			Icon, Date string
 		}{
-			Icon: icon(cfg.Icons, 12, float64(hour-1)),
+			Icon: icon(cfg.Icons, 12, float64(hour)),
 			Date: date.Format(cfg.Format),
 		})
 	})

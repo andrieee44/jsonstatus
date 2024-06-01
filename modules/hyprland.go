@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -41,6 +42,7 @@ func hyprlandEventChan(path string) (<-chan string, net.Conn) {
 		events     net.Conn
 		eventsChan chan string
 		scanner    *bufio.Scanner
+		event      string
 		err        error
 	)
 
@@ -57,7 +59,16 @@ func hyprlandEventChan(path string) (<-chan string, net.Conn) {
 				return
 			}
 
-			eventsChan <- scanner.Text()
+			event = scanner.Text()
+
+			switch {
+			case strings.HasPrefix(event, "workspace>>"):
+			case strings.HasPrefix(event, "activewindow>>"):
+			default:
+				continue
+			}
+
+			eventsChan <- event
 		}
 	}()
 
@@ -78,6 +89,7 @@ func hyprlandEvent(eventsChan <-chan string, interval time.Duration, window stri
 		select {
 		case _, ok = <-eventsChan:
 			IsChanClosed(ok)
+
 			return 0, false
 		case <-timer:
 			index++

@@ -3,6 +3,7 @@ package modules
 import (
 	"regexp"
 	"time"
+	"unicode/utf8"
 
 	"github.com/fhs/gompd/v2/mpd"
 )
@@ -39,12 +40,15 @@ func musicGet(format string) (string, string) {
 
 func musicEvent(watcher *mpd.Watcher, interval time.Duration, music string, limit, index int) (int, bool) {
 	var (
-		timer <-chan time.Time
-		ok    bool
-		err   error
+		timer    <-chan time.Time
+		musicLen int
+		ok       bool
+		err      error
 	)
 
-	if limit != 0 && interval != 0 && len(music) > limit {
+	musicLen = utf8.RuneCountInString(music)
+
+	if limit != 0 && interval != 0 && musicLen > limit {
 		timer = time.After(interval)
 	}
 
@@ -59,7 +63,7 @@ func musicEvent(watcher *mpd.Watcher, interval time.Duration, music string, limi
 	case <-timer:
 		index++
 
-		if index > len(music)-limit {
+		if index > musicLen-limit {
 			return 0, true
 		}
 	}

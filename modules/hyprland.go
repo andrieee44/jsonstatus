@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 type hyprlandConfig struct {
@@ -79,10 +80,13 @@ func hyprlandEventChan(path string) (<-chan string, net.Conn) {
 func hyprlandEvent(eventsChan <-chan string, interval time.Duration, window string, limit, index int) (int, bool) {
 	var (
 		timer <-chan time.Time
+		windowLen int
 		ok    bool
 	)
 
-	if limit != 0 && interval != 0 && len(window) > limit {
+	windowLen = utf8.RuneCountInString(window)
+
+	if limit != 0 && interval != 0 && windowLen > limit {
 		timer = time.After(interval)
 	}
 
@@ -95,7 +99,7 @@ func hyprlandEvent(eventsChan <-chan string, interval time.Duration, window stri
 		case <-timer:
 			index++
 
-			if index > len(window)-limit {
+			if index > windowLen-limit {
 				index = 0
 			}
 

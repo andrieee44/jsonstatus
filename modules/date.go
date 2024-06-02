@@ -22,7 +22,7 @@ func date(ch chan<- Message, cfg *dateConfig) {
 		date = time.Now()
 		hour = date.Hour()
 
-		if hour > 12 {
+		if hour >= 12 {
 			hour -= 12
 		}
 

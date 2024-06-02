@@ -64,6 +64,7 @@ func hyprlandEventChan(path string) (<-chan string, net.Conn) {
 			switch {
 			case strings.HasPrefix(event, "workspace>>"):
 			case strings.HasPrefix(event, "activewindow>>"):
+			case strings.HasPrefix(event, "destroyworkspace>>"):
 			default:
 				continue
 			}

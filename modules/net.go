@@ -61,7 +61,7 @@ func netWifiStrength(ifaceName string) float64 {
 	panic(errors.New("specified interface not found in /proc/net/wireless"))
 }
 
-func netWifi(wifiIcons []string, path string) (string, string, string) {
+func netWifi(wifiIcons []string, path string) (string, string) {
 	var (
 		ifaceName string
 		client    *wifi.Client
@@ -87,13 +87,13 @@ func netWifi(wifiIcons []string, path string) (string, string, string) {
 		bss, err = client.BSS(iface)
 		PanicIf(err)
 
-		return "wifi", bss.SSID, icon(wifiIcons, 100, netWifiStrength(ifaceName))
+		return bss.SSID, icon(wifiIcons, 100, netWifiStrength(ifaceName))
 	}
 
 	panic(errors.New("wifi.Interface not matching /sys/class/net/w*"))
 }
 
-func netIface(offIcon, ethIcon string, wifiIcons []string) (string, string, string) {
+func netIface(offIcon, ethIcon string, wifiIcons []string) (string, string) {
 	type iface struct {
 		wifi bool
 		path string
@@ -125,7 +125,7 @@ func netIface(offIcon, ethIcon string, wifiIcons []string) (string, string, stri
 	}
 
 	if len(ifaces) == 0 {
-		return "off", "off", offIcon
+		return "off", offIcon
 	}
 
 	slices.SortFunc(ifaces, func(a, b iface) int {
@@ -143,19 +143,18 @@ func netIface(offIcon, ethIcon string, wifiIcons []string) (string, string, stri
 		return netWifi(wifiIcons, ifaces[0].path)
 	}
 
-	return "eth", "eth", ethIcon
+	return "on", ethIcon
 }
 
 func network(ch chan<- Message, cfg *netConfig) {
 	go loopMessage(ch, "Net", cfg.Enable, cfg.Interval, func() json.RawMessage {
-		var typ, name, icon string
+		var name, icon string
 
-		typ, name, icon = netIface(cfg.OffIcon, cfg.EthIcon, cfg.WifiIcons)
+		name, icon = netIface(cfg.OffIcon, cfg.EthIcon, cfg.WifiIcons)
 
 		return marshalRawJson(struct {
 			Type, Name, Icon string
 		}{
-			Type: typ,
 			Name: name,
 			Icon: icon,
 		})

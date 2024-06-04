@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -26,6 +27,7 @@ type Config struct {
 	User     userConfig
 	Disk     diskConfig
 	Hyprland hyprlandConfig
+	Net      netConfig
 }
 
 type Message struct {
@@ -48,6 +50,7 @@ func Run(ch chan<- Message, cfg *Config) {
 	currentUser(ch, &cfg.User)
 	disk(ch, &cfg.Disk)
 	hyprland(ch, &cfg.Hyprland)
+	network(ch, &cfg.Net)
 }
 
 func DefaultConfig() *Config {
@@ -122,6 +125,16 @@ func DefaultConfig() *Config {
 			Interval: time.Second,
 			Limit:    20,
 		},
+
+		Net: netConfig{
+			Enable:        true,
+			Interval:      time.Second,
+			IndexInterval: time.Minute,
+			Limit:         20,
+			OffIcon:       "󰤭",
+			EthIcon:       "󰈀",
+			WifiIcons:     []string{"󰤯", "󰤟", "󰤢", "󰤥", "󰤨"},
+		},
 	}
 }
 
@@ -135,6 +148,14 @@ func IsChanClosed(ok bool) {
 	if !ok {
 		log.Panic(errChanClosed)
 	}
+}
+
+func exists(elem ...string) bool {
+	var err error
+
+	_, err = os.Stat(filepath.Join(elem...))
+
+	return !os.IsNotExist(err)
 }
 
 func icon(icons []string, max, val float64) string {

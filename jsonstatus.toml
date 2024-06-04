@@ -56,3 +56,12 @@ icons = [ " ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█" ]
 enable = true
 interval = "1s"
 limit = 20
+
+[net]
+enable = true
+interval = "1m"
+indexInterval = "1s"
+limit = 20
+offIcon = "󰤭"
+ethIcon = "󰈀"
+wifiIcons = [ "󰤯", "󰤟", "󰤢", "󰤥", "󰤨" ]

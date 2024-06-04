@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/BurntSushi/toml"
 	"github.com/andrieee44/jsonstatus/modules"
@@ -17,12 +18,12 @@ func configDir() string {
 
 	dir = os.Getenv("XDG_CONFIG_HOME")
 	if dir != "" {
-		return dir + dirname
+		return filepath.Join(dir, dirname)
 	}
 
 	dir = os.Getenv("HOME")
 	if dir != "" {
-		return dir + "/.config" + dirname
+		return filepath.Join(dir, ".config", dirname)
 	}
 
 	panic(errors.New("$HOME is empty"))
@@ -45,7 +46,7 @@ func configFile() *os.File {
 	dir = configDir()
 	modules.PanicIf(os.MkdirAll(dir, 0755))
 
-	file, err = os.OpenFile(dir+"/jsonstatus.toml", os.O_RDONLY|os.O_CREATE, 0644)
+	file, err = os.OpenFile(filepath.Join(dir, "jsonstatus.toml"), os.O_RDONLY|os.O_CREATE, 0644)
 	modules.PanicIf(err)
 
 	return file

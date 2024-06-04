@@ -33,10 +33,10 @@ func bat(ch chan<- Message, cfg *batConfig) {
 		PanicIf(err)
 
 		for _, v = range batPaths {
-			buf, err = os.ReadFile(v + "/status")
+			buf, err = os.ReadFile(filepath.Join(v, "status"))
 			PanicIf(err)
 
-			capacity = pathAtoi(v + "/capacity")
+			capacity = pathAtoi(filepath.Join(v, "capacity"))
 
 			bats = append(bats, batInfo{
 				Name:     filepath.Base(v),

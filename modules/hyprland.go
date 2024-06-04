@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -35,7 +36,7 @@ func hyprlandSocketsPath() string {
 		panic(errors.New("XDG_RUNTIME_DIR is empty"))
 	}
 
-	return runtime + "/hypr/" + his + "/"
+	return filepath.Join(runtime, "hypr", his)
 }
 
 func hyprlandEventChan(path string) (<-chan string, net.Conn) {
@@ -47,7 +48,7 @@ func hyprlandEventChan(path string) (<-chan string, net.Conn) {
 		err        error
 	)
 
-	events, err = net.Dial("unix", path+".socket2.sock")
+	events, err = net.Dial("unix", filepath.Join(path, ".socket2.sock"))
 	PanicIf(err)
 
 	eventsChan = make(chan string)
@@ -79,9 +80,9 @@ func hyprlandEventChan(path string) (<-chan string, net.Conn) {
 
 func hyprlandEvent(eventsChan <-chan string, interval time.Duration, window string, limit, index int) (int, bool) {
 	var (
-		timer <-chan time.Time
+		timer     <-chan time.Time
 		windowLen int
-		ok    bool
+		ok        bool
 	)
 
 	windowLen = utf8.RuneCountInString(window)
@@ -128,7 +129,7 @@ func hyprlandRequest(path string) (string, []hyprlandWorkspace, int) {
 		err        error
 	)
 
-	query, err = net.Dial("unix", path+".socket.sock")
+	query, err = net.Dial("unix", filepath.Join(path, ".socket.sock"))
 	PanicIf(err)
 
 	_, err = query.Write([]byte("[[BATCH]]j/activewindow;j/workspaces;j/monitors"))

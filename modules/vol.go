@@ -7,12 +7,12 @@ import (
 )
 
 type volConfig struct {
-	Enable  bool
-	Discard time.Duration
-	Icons   []string
+	Enable          bool
+	DiscardInterval time.Duration
+	Icons           []string
 }
 
-func volDiscardUpdates(updates <-chan struct{}, discard time.Duration) {
+func volDiscardUpdates(updates <-chan struct{}, discardInterval time.Duration) {
 	var ok bool
 
 	_, ok = <-updates
@@ -22,7 +22,7 @@ func volDiscardUpdates(updates <-chan struct{}, discard time.Duration) {
 		select {
 		case _, ok = <-updates:
 			IsChanClosed(ok)
-		case <-time.After(discard):
+		case <-time.After(discardInterval):
 			return
 		}
 	}
@@ -70,7 +70,7 @@ func vol(ch chan<- Message, cfg *volConfig) {
 				Icon: icon(cfg.Icons, 100, volumePerc),
 			}))
 
-			volDiscardUpdates(updates, cfg.Discard)
+			volDiscardUpdates(updates, cfg.DiscardInterval)
 		}
 	}()
 }

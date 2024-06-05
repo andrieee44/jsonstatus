@@ -80,7 +80,7 @@ func music(ch chan<- Message, cfg *musicConfig) {
 		var (
 			watcher      *mpd.Watcher
 			music, state string
-			scroll        int
+			scroll       int
 			unchanged    bool
 			err          error
 		)
@@ -99,10 +99,10 @@ func music(ch chan<- Message, cfg *musicConfig) {
 
 			sendMessage(ch, "Music", marshalRawJson(struct {
 				Music, State string
-				Scroll        int
+				Scroll       int
 			}{
-				Music: music,
-				State: state,
+				Music:  music,
+				State:  state,
 				Scroll: scroll,
 			}))
 

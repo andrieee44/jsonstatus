@@ -99,9 +99,9 @@ func DefaultConfig() *Config {
 		},
 
 		Vol: volConfig{
-			Enable:  true,
-			Discard: time.Millisecond * 10,
-			Icons:   []string{"󰕿", "󰖀", "󰕾"},
+			Enable:          true,
+			DiscardInterval: time.Millisecond * 10,
+			Icons:           []string{"󰕿", "󰖀", "󰕾"},
 		},
 
 		Uptime: uptimeConfig{

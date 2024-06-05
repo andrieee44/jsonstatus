@@ -15,11 +15,11 @@ import (
 )
 
 type netConfig struct {
-	Enable                  bool
-	Interval, IndexInterval time.Duration
-	Limit                   int
-	OffIcon, EthIcon        string
-	WifiIcons               []string
+	Enable                   bool
+	Interval, ScrollInterval time.Duration
+	Limit                    int
+	OffIcon, EthIcon         string
+	WifiIcons                []string
 }
 
 func netWifiStrength(ifaceName string) float64 {

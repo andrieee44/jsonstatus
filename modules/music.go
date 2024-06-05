@@ -9,10 +9,10 @@ import (
 )
 
 type musicConfig struct {
-	Enable   bool
-	Interval time.Duration
-	Format   string
-	Limit    int
+	Enable         bool
+	ScrollInterval time.Duration
+	Format         string
+	Limit          int
 }
 
 func musicGet(format string) (string, string) {
@@ -38,7 +38,7 @@ func musicGet(format string) (string, string) {
 	}), status["state"]
 }
 
-func musicEvent(watcher *mpd.Watcher, interval time.Duration, music string, limit, index int) (int, bool) {
+func musicEvent(watcher *mpd.Watcher, scrollInterval time.Duration, music string, limit, scroll int) (int, bool) {
 	var (
 		timer    <-chan time.Time
 		musicLen int
@@ -48,8 +48,8 @@ func musicEvent(watcher *mpd.Watcher, interval time.Duration, music string, limi
 
 	musicLen = utf8.RuneCountInString(music)
 
-	if limit != 0 && interval != 0 && musicLen > limit {
-		timer = time.After(interval)
+	if limit != 0 && scrollInterval != 0 && musicLen > limit {
+		timer = time.After(scrollInterval)
 	}
 
 	select {
@@ -61,14 +61,14 @@ func musicEvent(watcher *mpd.Watcher, interval time.Duration, music string, limi
 		IsChanClosed(ok)
 		PanicIf(err)
 	case <-timer:
-		index++
+		scroll++
 
-		if index > musicLen-limit {
+		if scroll > musicLen-limit {
 			return 0, true
 		}
 	}
 
-	return index, true
+	return scroll, true
 }
 
 func music(ch chan<- Message, cfg *musicConfig) {
@@ -80,7 +80,7 @@ func music(ch chan<- Message, cfg *musicConfig) {
 		var (
 			watcher      *mpd.Watcher
 			music, state string
-			index        int
+			scroll        int
 			unchanged    bool
 			err          error
 		)
@@ -99,14 +99,14 @@ func music(ch chan<- Message, cfg *musicConfig) {
 
 			sendMessage(ch, "Music", marshalRawJson(struct {
 				Music, State string
-				Index        int
+				Scroll        int
 			}{
 				Music: music,
 				State: state,
-				Index: index,
+				Scroll: scroll,
 			}))
 
-			index, unchanged = musicEvent(watcher, cfg.Interval, music, cfg.Limit, index)
+			scroll, unchanged = musicEvent(watcher, cfg.ScrollInterval, music, cfg.Limit, scroll)
 		}
 	}()
 }

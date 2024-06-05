@@ -92,10 +92,10 @@ func DefaultConfig() *Config {
 		},
 
 		Music: musicConfig{
-			Enable:   true,
-			Interval: time.Second,
-			Format:   "%AlbumArtist% - %Title%",
-			Limit:    20,
+			Enable:         true,
+			ScrollInterval: time.Second,
+			Format:         "%AlbumArtist% - %Title%",
+			Limit:          20,
 		},
 
 		Vol: volConfig{
@@ -121,19 +121,19 @@ func DefaultConfig() *Config {
 		},
 
 		Hyprland: hyprlandConfig{
-			Enable:   true,
-			Interval: time.Second,
-			Limit:    20,
+			Enable:         true,
+			ScrollInterval: time.Second,
+			Limit:          20,
 		},
 
 		Net: netConfig{
-			Enable:        true,
-			Interval:      time.Second,
-			IndexInterval: time.Minute,
-			Limit:         20,
-			OffIcon:       "󰤭",
-			EthIcon:       "󰈀",
-			WifiIcons:     []string{"󰤯", "󰤟", "󰤢", "󰤥", "󰤨"},
+			Enable:         true,
+			Interval:       time.Second,
+			ScrollInterval: time.Minute,
+			Limit:          20,
+			OffIcon:        "󰤭",
+			EthIcon:        "󰈀",
+			WifiIcons:      []string{"󰤯", "󰤟", "󰤢", "󰤥", "󰤨"},
 		},
 	}
 }

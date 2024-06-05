@@ -13,9 +13,9 @@ import (
 )
 
 type hyprlandConfig struct {
-	Enable   bool
-	Interval time.Duration
-	Limit    int
+	Enable         bool
+	ScrollInterval time.Duration
+	Limit          int
 }
 
 type hyprlandWorkspace struct {
@@ -78,7 +78,7 @@ func hyprlandEventChan(path string) (<-chan string, net.Conn) {
 	return eventsChan, events
 }
 
-func hyprlandEvent(eventsChan <-chan string, interval time.Duration, window string, limit, index int) (int, bool) {
+func hyprlandEvent(eventsChan <-chan string, scrollInterval time.Duration, window string, limit, scroll int) (int, bool) {
 	var (
 		timer     <-chan time.Time
 		windowLen int
@@ -87,8 +87,8 @@ func hyprlandEvent(eventsChan <-chan string, interval time.Duration, window stri
 
 	windowLen = utf8.RuneCountInString(window)
 
-	if limit != 0 && interval != 0 && windowLen > limit {
-		timer = time.After(interval)
+	if limit != 0 && scrollInterval != 0 && windowLen > limit {
+		timer = time.After(scrollInterval)
 	}
 
 	for {
@@ -98,13 +98,13 @@ func hyprlandEvent(eventsChan <-chan string, interval time.Duration, window stri
 
 			return 0, false
 		case <-timer:
-			index++
+			scroll++
 
-			if index > windowLen-limit {
-				index = 0
+			if scroll > windowLen-limit {
+				scroll = 0
 			}
 
-			return index, true
+			return scroll, true
 		}
 	}
 }
@@ -152,12 +152,12 @@ func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 
 	go func() {
 		var (
-			path, window  string
-			events        net.Conn
-			eventsChan    <-chan string
-			workspaces    []hyprlandWorkspace
-			active, index int
-			unchanged     bool
+			path, window   string
+			events         net.Conn
+			eventsChan     <-chan string
+			workspaces     []hyprlandWorkspace
+			active, scroll int
+			unchanged      bool
 		)
 
 		path = hyprlandSocketsPath()
@@ -173,17 +173,17 @@ func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 			}
 
 			sendMessage(ch, "Hyprland", marshalRawJson(struct {
-				Window        string
-				Workspaces    []hyprlandWorkspace
-				Active, Index int
+				Window         string
+				Workspaces     []hyprlandWorkspace
+				Active, Scroll int
 			}{
 				Window:     window,
 				Workspaces: workspaces,
 				Active:     active,
-				Index:      index,
+				Scroll:     scroll,
 			}))
 
-			index, unchanged = hyprlandEvent(eventsChan, cfg.Interval, window, cfg.Limit, index)
+			scroll, unchanged = hyprlandEvent(eventsChan, cfg.ScrollInterval, window, cfg.Limit, scroll)
 		}
 	}()
 }

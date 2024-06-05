@@ -30,13 +30,13 @@ icons = [ "", "", "", "", "" ]
 
 [music]
 enable = true
-interval = "1s"
+scrollInterval = "1s"
 format = "%AlbumArtist% - %Title%"
 limit = 20
 
 [vol]
 enable = true
-discard = "10ms"
+discardInterval = "10ms"
 icons = [ "󰕿", "󰖀", "󰕾" ]
 
 [uptime]
@@ -54,13 +54,13 @@ icons = [ " ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█" ]
 
 [hyprland]
 enable = true
-interval = "1s"
+scrollInterval = "1s"
 limit = 20
 
 [net]
 enable = true
 interval = "1m"
-indexInterval = "1s"
+scrollInterval = "1s"
 limit = 20
 offIcon = "󰤭"
 ethIcon = "󰈀"

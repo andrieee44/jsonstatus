@@ -60,15 +60,18 @@ func musicEvent(watcher *mpd.Watcher, scrollInterval time.Duration, music string
 	case err, ok = <-watcher.Error:
 		IsChanClosed(ok)
 		PanicIf(err)
-	case <-timer:
-		scroll++
 
+		return 0, false
+	case _, ok = <-timer:
+		IsChanClosed(ok)
+
+		scroll++
 		if scroll > musicLen-limit {
 			return 0, true
 		}
-	}
 
-	return scroll, true
+		return scroll, true
+	}
 }
 
 func music(ch chan<- Message, cfg *musicConfig) {

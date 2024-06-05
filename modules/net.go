@@ -2,7 +2,6 @@ package modules
 
 import (
 	"bufio"
-	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -10,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/mdlayher/wifi"
 )
@@ -146,17 +146,81 @@ func netIface(offIcon, ethIcon string, wifiIcons []string) (string, string) {
 	return "on", ethIcon
 }
 
+func netEventChan(interval time.Duration) <-chan struct{} {
+	var eventsChan chan struct{}
+
+	eventsChan = make(chan struct{})
+
+	go func() {
+		for {
+			time.Sleep(interval)
+			eventsChan <- struct{}{}
+		}
+	}()
+
+	return eventsChan
+}
+
+func netEvent(eventsChan <-chan struct{}, scrollInterval time.Duration, name string, limit, scroll int) (int, bool) {
+	var (
+		timer   <-chan time.Time
+		nameLen int
+		ok      bool
+	)
+
+	nameLen = utf8.RuneCountInString(name)
+
+	if limit != 0 && scrollInterval != 0 && nameLen > limit {
+		timer = time.After(scrollInterval)
+	}
+
+	select {
+	case _, ok = <-eventsChan:
+		IsChanClosed(ok)
+
+		return 0, false
+	case _, ok = <-timer:
+		IsChanClosed(ok)
+
+		scroll++
+		if scroll > nameLen-limit {
+			return 0, true
+		}
+
+		return scroll, true
+	}
+}
+
 func network(ch chan<- Message, cfg *netConfig) {
-	go loopMessage(ch, "Net", cfg.Enable, cfg.Interval, func() json.RawMessage {
-		var name, icon string
+	if !cfg.Enable {
+		return
+	}
 
-		name, icon = netIface(cfg.OffIcon, cfg.EthIcon, cfg.WifiIcons)
+	go func() {
+		var (
+			eventsChan <-chan struct{}
+			name, icon string
+			scroll     int
+			unchanged  bool
+		)
 
-		return marshalRawJson(struct {
-			Type, Name, Icon string
-		}{
-			Name: name,
-			Icon: icon,
-		})
-	})
+		eventsChan = netEventChan(cfg.Interval)
+
+		for {
+			if !unchanged {
+				name, icon = netIface(cfg.OffIcon, cfg.EthIcon, cfg.WifiIcons)
+			}
+
+			sendMessage(ch, "Net", marshalRawJson(struct {
+				Name, Icon string
+				Scroll     int
+			}{
+				Name:   name,
+				Icon:   icon,
+				Scroll: scroll,
+			}))
+
+			scroll, unchanged = netEvent(eventsChan, cfg.ScrollInterval, name, cfg.Limit, scroll)
+		}
+	}()
 }

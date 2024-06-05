@@ -91,21 +91,20 @@ func hyprlandEvent(eventsChan <-chan string, scrollInterval time.Duration, windo
 		timer = time.After(scrollInterval)
 	}
 
-	for {
-		select {
-		case _, ok = <-eventsChan:
-			IsChanClosed(ok)
+	select {
+	case _, ok = <-eventsChan:
+		IsChanClosed(ok)
 
-			return 0, false
-		case <-timer:
-			scroll++
+		return 0, false
+	case _, ok = <-timer:
+		IsChanClosed(ok)
 
-			if scroll > windowLen-limit {
-				scroll = 0
-			}
-
-			return scroll, true
+		scroll++
+		if scroll > windowLen-limit {
+			scroll = 0
 		}
+
+		return scroll, true
 	}
 }
 

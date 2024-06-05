@@ -58,7 +58,7 @@ scrollInterval = "1s"
 limit = 20
 
 [net]
-enable = true
+enable = false
 interval = "1m"
 scrollInterval = "1s"
 limit = 20

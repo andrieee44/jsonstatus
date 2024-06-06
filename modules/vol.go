@@ -40,10 +40,19 @@ func vol(ch chan<- Message, cfg *volConfig) {
 			volumePerc float64
 			mute       bool
 			updates    <-chan struct{}
+			i          int
 			err        error
 		)
 
-		client, err = pulseaudio.NewClient()
+		for i = 0; i < 10; i++{
+			time.Sleep(5)
+
+			client, err = pulseaudio.NewClient()
+			if err == nil {
+				break
+			}
+		}
+
 		PanicIf(err)
 
 		updates, err = client.Updates()

@@ -1,43 +1,58 @@
-[date]
+[bat]
 enable = false
+icons = ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
 interval = "1m"
-format = "Jan _2 2006 (Mon) 3:04 PM"
-icons = [ "󱑊", "󱐿", "󱑀", "󱑁", "󱑂", "󱑃", "󱑄", "󱑅", "󱑆", "󱑇", "󱑈", "󱑉" ]
-
-[ram]
-enable = false
-interval = "1s"
-icons = [ " ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█" ]
-
-[swap]
-enable = false
-interval = "1s"
-icons = [ " ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█" ]
-
-[cpu]
-enable = false
-interval = "1s"
-icons = [ " ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█" ]
 
 [bri]
 enable = false
-icons = [ "󰃞", "󰃟", "󰃝", "󰃠" ]
+icons = ["󰃞", "󰃟", "󰃝", "󰃠"]
 
-[bat]
+[cpu]
 enable = false
+icons = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+interval = "1s"
+
+[date]
+enable = false
+format = "Jan _2 2006 (Mon) 3:04 PM"
+icons = ["󱑊", "󱐿", "󱑀", "󱑁", "󱑂", "󱑃", "󱑄", "󱑅", "󱑆", "󱑇", "󱑈", "󱑉"]
 interval = "1m"
-icons = [ "", "", "", "", "" ]
+
+[disk]
+disks = ["/"]
+enable = false
+icons = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+interval = "1m"
+
+[hyprland]
+enable = false
+limit = 20
+scrollInterval = "1s"
 
 [music]
 enable = false
-scrollInterval = "1s"
-format = "%AlbumArtist% - %Title%"
+format = "%AlbumArtist% - %Track% - %Album% - %Title%"
 limit = 20
+scrollInterval = "1s"
 
-[vol]
+[net]
 enable = false
-discardInterval = "10ms"
-icons = [ "󰕿", "󰖀", "󰕾" ]
+ethIcon = "󰈀"
+interval = "1m"
+limit = 20
+offIcon = "󰤭"
+scrollInterval = "1s"
+wifiIcons = ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"]
+
+[ram]
+enable = false
+icons = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+interval = "1s"
+
+[swap]
+enable = false
+icons = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+interval = "1s"
 
 [uptime]
 enable = false
@@ -46,22 +61,7 @@ interval = "1m"
 [user]
 enable = false
 
-[disk]
+[vol]
+discardInterval = "10ms"
 enable = false
-interval = "1m"
-disks = [ "/" ]
-icons = [ " ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█" ]
-
-[hyprland]
-enable = false
-scrollInterval = "1s"
-limit = 20
-
-[net]
-enable = false
-interval = "1m"
-scrollInterval = "1s"
-limit = 20
-offIcon = "󰤭"
-ethIcon = "󰈀"
-wifiIcons = [ "󰤯", "󰤟", "󰤢", "󰤥", "󰤨" ]
+icons = ["󰕿", "󰖀", "󰕾"]

@@ -16,12 +16,12 @@ func volDiscardUpdates(updates <-chan struct{}, discardInterval time.Duration) {
 	var ok bool
 
 	_, ok = <-updates
-	IsChanClosed(ok)
+	PanicIfClosed(ok)
 
 	for {
 		select {
 		case _, ok = <-updates:
-			IsChanClosed(ok)
+			PanicIfClosed(ok)
 		case <-time.After(discardInterval):
 			return
 		}

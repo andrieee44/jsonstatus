@@ -54,16 +54,16 @@ func musicEvent(watcher *mpd.Watcher, scrollInterval time.Duration, music string
 
 	select {
 	case _, ok = <-watcher.Event:
-		IsChanClosed(ok)
+		PanicIfClosed(ok)
 
 		return 0, false
 	case err, ok = <-watcher.Error:
-		IsChanClosed(ok)
+		PanicIfClosed(ok)
 		PanicIf(err)
 
 		return 0, false
 	case _, ok = <-timer:
-		IsChanClosed(ok)
+		PanicIfClosed(ok)
 
 		scroll++
 		if scroll > musicLen-limit {

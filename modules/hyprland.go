@@ -93,11 +93,11 @@ func hyprlandEvent(eventsChan <-chan string, scrollInterval time.Duration, windo
 
 	select {
 	case _, ok = <-eventsChan:
-		IsChanClosed(ok)
+		PanicIfClosed(ok)
 
 		return 0, false
 	case _, ok = <-timer:
-		IsChanClosed(ok)
+		PanicIfClosed(ok)
 
 		scroll++
 		if scroll > windowLen-limit {

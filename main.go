@@ -12,7 +12,7 @@ import (
 )
 
 func configDir() string {
-	const dirname string = "/jsonstatus"
+	const dirname string = "jsonstatus"
 
 	var dir string
 
@@ -73,22 +73,22 @@ func configToml() *modules.Config {
 func main() {
 	var (
 		ch       chan modules.Message
-		msgMap   map[string]json.RawMessage
-		msg      modules.Message
-		jsonData []byte
+		messages map[string]json.RawMessage
+		message  modules.Message
+		data     []byte
 		err      error
 	)
 
 	ch = make(chan modules.Message)
-	msgMap = make(map[string]json.RawMessage)
+	messages = make(map[string]json.RawMessage)
 	modules.Run(ch, configToml())
 
-	for msg = range ch {
-		msgMap[msg.Name] = msg.Json
+	for message = range ch {
+		messages[message.Name] = message.Data
 
-		jsonData, err = json.Marshal(msgMap)
+		data, err = json.Marshal(messages)
 		modules.PanicIf(err)
 
-		fmt.Println(string(jsonData))
+		fmt.Println(string(data))
 	}
 }

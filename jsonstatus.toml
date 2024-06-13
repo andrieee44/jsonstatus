@@ -3,6 +3,12 @@ enable = false
 icons = ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
 interval = "1m"
 
+[bluetooth]
+enable = true
+icons = ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+limit = 20
+scrollInterval = "1s"
+
 [bri]
 enable = false
 icons = ["󰃞", "󰃟", "󰃝", "󰃠"]

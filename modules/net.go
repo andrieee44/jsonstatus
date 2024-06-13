@@ -176,11 +176,11 @@ func netEvent(eventsChan <-chan struct{}, scrollInterval time.Duration, name str
 
 	select {
 	case _, ok = <-eventsChan:
-		IsChanClosed(ok)
+		PanicIfClosed(ok)
 
 		return 0, false
 	case _, ok = <-timer:
-		IsChanClosed(ok)
+		PanicIfClosed(ok)
 
 		scroll++
 		if scroll > nameLen-limit {

@@ -15,24 +15,25 @@ import (
 )
 
 type Config struct {
-	Date     dateConfig
-	Ram      ramConfig
-	Swap     swapConfig
-	Cpu      cpuConfig
-	Bri      briConfig
-	Bat      batConfig
-	Music    musicConfig
-	Vol      volConfig
-	Uptime   uptimeConfig
-	User     userConfig
-	Disk     diskConfig
-	Hyprland hyprlandConfig
-	Net      netConfig
+	Date      dateConfig
+	Ram       ramConfig
+	Swap      swapConfig
+	Cpu       cpuConfig
+	Bri       briConfig
+	Bat       batConfig
+	Music     musicConfig
+	Vol       volConfig
+	Uptime    uptimeConfig
+	User      userConfig
+	Disk      diskConfig
+	Hyprland  hyprlandConfig
+	Net       netConfig
+	Bluetooth bluetoothConfig
 }
 
 type Message struct {
 	Name string
-	Json json.RawMessage
+	Data json.RawMessage
 }
 
 var errChanClosed = errors.New("channel closed unexpectedly")
@@ -51,6 +52,7 @@ func Run(ch chan<- Message, cfg *Config) {
 	disk(ch, &cfg.Disk)
 	hyprland(ch, &cfg.Hyprland)
 	network(ch, &cfg.Net)
+	bluetooth(ch, &cfg.Bluetooth)
 }
 
 func DefaultConfig() *Config {
@@ -59,7 +61,7 @@ func DefaultConfig() *Config {
 			Enable:   true,
 			Interval: time.Minute,
 			Format:   "Jan _2 2006 (Mon) 3:04 PM",
-			Icons:    []string{"󱐿", "󱑀", "󱑁", "󱑂", "󱑃", "󱑄", "󱑅", "󱑆", "󱑇", "󱑈", "󱑉", "󱑊"},
+			Icons:    []string{"󱑊", "󱐿", "󱑀", "󱑁", "󱑂", "󱑃", "󱑄", "󱑅", "󱑆", "󱑇", "󱑈", "󱑉"},
 		},
 
 		Ram: ramConfig{
@@ -88,13 +90,13 @@ func DefaultConfig() *Config {
 		Bat: batConfig{
 			Enable:   true,
 			Interval: time.Minute,
-			Icons:    []string{"", "", "", "", ""},
+			Icons:    []string{"󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"},
 		},
 
 		Music: musicConfig{
 			Enable:         true,
 			ScrollInterval: time.Second,
-			Format:         "%AlbumArtist% - %Title%",
+			Format:         "%AlbumArtist% - %Track% - %Album% - %Title%",
 			Limit:          20,
 		},
 
@@ -135,6 +137,13 @@ func DefaultConfig() *Config {
 			EthIcon:        "󰈀",
 			WifiIcons:      []string{"󰤯", "󰤟", "󰤢", "󰤥", "󰤨"},
 		},
+
+		Bluetooth: bluetoothConfig{
+			Enable:         true,
+			ScrollInterval: time.Second,
+			Limit:          20,
+			Icons:          []string{"", "", "", "", ""},
+		},
 	}
 }
 
@@ -144,7 +153,7 @@ func PanicIf(err error) {
 	}
 }
 
-func IsChanClosed(ok bool) {
+func PanicIfClosed(ok bool) {
 	if !ok {
 		log.Panic(errChanClosed)
 	}
@@ -201,13 +210,13 @@ func notifyWatcher(watcher *fsnotify.Watcher, handler func(fsnotify.Event) bool)
 	for {
 		select {
 		case event, ok = <-watcher.Events:
-			IsChanClosed(ok)
+			PanicIfClosed(ok)
 
 			if handler(event) {
 				return
 			}
 		case err, ok = <-watcher.Errors:
-			IsChanClosed(ok)
+			PanicIfClosed(ok)
 			PanicIf(err)
 		}
 	}
@@ -303,7 +312,7 @@ func marshalRawJson(v any) json.RawMessage {
 func sendMessage(ch chan<- Message, name string, msg json.RawMessage) {
 	ch <- Message{
 		Name: name,
-		Json: msg,
+		Data: msg,
 	}
 }
 

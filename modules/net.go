@@ -212,12 +212,13 @@ func network(ch chan<- Message, cfg *netConfig) {
 			}
 
 			sendMessage(ch, "Net", marshalRawJson(struct {
-				Name, Icon string
-				Scroll     int
+				Name, Icon    string
+				Scroll, Limit int
 			}{
 				Name:   name,
 				Icon:   icon,
 				Scroll: scroll,
+				Limit:  cfg.Limit,
 			}))
 
 			scroll, unchanged = netEvent(eventsChan, cfg.ScrollInterval, name, cfg.Limit, scroll)

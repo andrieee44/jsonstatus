@@ -172,14 +172,15 @@ func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 			}
 
 			sendMessage(ch, "Hyprland", marshalRawJson(struct {
-				Window         string
-				Workspaces     []hyprlandWorkspace
-				Active, Scroll int
+				Window                string
+				Workspaces            []hyprlandWorkspace
+				Active, Scroll, Limit int
 			}{
 				Window:     window,
 				Workspaces: workspaces,
 				Active:     active,
 				Scroll:     scroll,
+				Limit:      cfg.Limit,
 			}))
 
 			scroll, unchanged = hyprlandEvent(eventsChan, cfg.ScrollInterval, window, cfg.Limit, scroll)

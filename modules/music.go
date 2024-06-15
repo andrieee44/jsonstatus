@@ -101,12 +101,13 @@ func music(ch chan<- Message, cfg *musicConfig) {
 			}
 
 			sendMessage(ch, "Music", marshalRawJson(struct {
-				Music, State string
-				Scroll       int
+				Music, State  string
+				Scroll, Limit int
 			}{
 				Music:  music,
 				State:  state,
 				Scroll: scroll,
+				Limit:  cfg.Limit,
 			}))
 
 			scroll, unchanged = musicEvent(watcher, cfg.ScrollInterval, music, cfg.Limit, scroll)

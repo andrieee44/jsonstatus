@@ -377,7 +377,14 @@ func bluetooth(ch chan<- Message, cfg *bluetoothConfig) {
 		sysbus.Signal(events)
 
 		for {
-			sendMessage(ch, "Bluetooth", marshalRawJson(adapters))
+			sendMessage(ch, "Bluetooth", marshalRawJson(struct {
+				Adapters map[dbus.ObjectPath]*bluetoothAdapter
+				Limit    int
+			}{
+				Adapters: adapters,
+				Limit:    cfg.Limit,
+			}))
+
 			bluetoothEvent(sysbus, events, adapters, outputChanged, cfg)
 		}
 	}()

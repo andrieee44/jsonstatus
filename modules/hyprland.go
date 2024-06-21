@@ -23,6 +23,11 @@ type hyprlandWorkspace struct {
 	Name string
 }
 
+type hyprlandMonitor struct {
+	Active     int
+	Workspaces []hyprlandWorkspace
+}
+
 func hyprlandSocketsPath() string {
 	var his, runtime string
 
@@ -108,40 +113,63 @@ func hyprlandEvent(eventsChan <-chan string, scrollInterval time.Duration, windo
 	}
 }
 
-func hyprlandRequest(path string) (string, []hyprlandWorkspace, int) {
-	type window struct {
-		Title string
+func hyprlandRequest(path string) (string, map[string]*hyprlandMonitor) {
+	type workspace struct {
+		Id            int
+		Monitor, Name string
 	}
 
 	type monitor struct {
+		Name string
+
 		ActiveWorkspace struct {
 			Id int
 		}
 	}
 
 	var (
-		query      net.Conn
-		decoder    *json.Decoder
-		win        window
-		workspaces []hyprlandWorkspace
-		monitors   []monitor
-		err        error
+		query             net.Conn
+		decoder           *json.Decoder
+		monitors          []monitor
+		mon               monitor
+		workspaces        []workspace
+		ws                workspace
+		monitorWorkspaces map[string]*hyprlandMonitor
+		err               error
+
+		win struct {
+			Title string
+		}
 	)
 
 	query, err = net.Dial("unix", filepath.Join(path, ".socket.sock"))
 	PanicIf(err)
 
-	_, err = query.Write([]byte("[[BATCH]]j/activewindow;j/workspaces;j/monitors"))
+	_, err = query.Write([]byte("[[BATCH]]j/activewindow;j/monitors;j/workspaces"))
 	PanicIf(err)
 
 	decoder = json.NewDecoder(query)
 	PanicIf(decoder.Decode(&win))
-	PanicIf(decoder.Decode(&workspaces))
 	PanicIf(decoder.Decode(&monitors))
-
+	PanicIf(decoder.Decode(&workspaces))
 	PanicIf(query.Close())
 
-	return win.Title, workspaces, monitors[0].ActiveWorkspace.Id
+	monitorWorkspaces = make(map[string]*hyprlandMonitor)
+
+	for _, mon = range monitors {
+		monitorWorkspaces[mon.Name] = &hyprlandMonitor{
+			Active: mon.ActiveWorkspace.Id,
+		}
+	}
+
+	for _, ws = range workspaces {
+		monitorWorkspaces[ws.Monitor].Workspaces = append(monitorWorkspaces[ws.Monitor].Workspaces, hyprlandWorkspace{
+			Id:   ws.Id,
+			Name: ws.Name,
+		})
+	}
+
+	return win.Title, monitorWorkspaces
 }
 
 func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
@@ -151,12 +179,12 @@ func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 
 	go func() {
 		var (
-			path, window   string
-			events         net.Conn
-			eventsChan     <-chan string
-			workspaces     []hyprlandWorkspace
-			active, scroll int
-			unchanged      bool
+			path, window      string
+			events            net.Conn
+			eventsChan        <-chan string
+			monitorWorkspaces map[string]*hyprlandMonitor
+			scroll            int
+			unchanged         bool
 		)
 
 		path = hyprlandSocketsPath()
@@ -168,19 +196,18 @@ func hyprland(ch chan<- Message, cfg *hyprlandConfig) {
 
 		for {
 			if !unchanged {
-				window, workspaces, active = hyprlandRequest(path)
+				window, monitorWorkspaces = hyprlandRequest(path)
 			}
 
 			sendMessage(ch, "Hyprland", marshalRawJson(struct {
-				Window                string
-				Workspaces            []hyprlandWorkspace
-				Active, Scroll, Limit int
+				Window        string
+				Monitors      map[string]*hyprlandMonitor
+				Scroll, Limit int
 			}{
-				Window:     window,
-				Workspaces: workspaces,
-				Active:     active,
-				Scroll:     scroll,
-				Limit:      cfg.Limit,
+				Window:   window,
+				Monitors: monitorWorkspaces,
+				Scroll:   scroll,
+				Limit:    cfg.Limit,
 			}))
 
 			scroll, unchanged = hyprlandEvent(eventsChan, cfg.ScrollInterval, window, cfg.Limit, scroll)

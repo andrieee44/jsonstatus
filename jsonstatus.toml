@@ -4,7 +4,7 @@ icons = ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁",
 interval = "1m"
 
 [bluetooth]
-enable = true
+enable = false
 icons = ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
 limit = 20
 scrollInterval = "1s"
@@ -31,7 +31,7 @@ icons = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
 interval = "1m"
 
 [hyprland]
-enable = false
+enable = true
 limit = 20
 scrollInterval = "1s"
 

@@ -164,7 +164,7 @@ func exists(elem ...string) bool {
 
 	_, err = os.Stat(filepath.Join(elem...))
 
-	return !os.IsNotExist(err)
+	return errors.Is(err, os.ErrNotExist)
 }
 
 func icon(icons []string, max, val float64) string {

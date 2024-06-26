@@ -12,18 +12,18 @@ import (
 )
 
 func configDir() string {
-	const dirname string = "jsonstatus"
+	const dirName string = "jsonstatus"
 
 	var dir string
 
 	dir = os.Getenv("XDG_CONFIG_HOME")
 	if dir != "" {
-		return filepath.Join(dir, dirname)
+		return filepath.Join(dir, dirName)
 	}
 
 	dir = os.Getenv("HOME")
 	if dir != "" {
-		return filepath.Join(dir, ".config", dirname)
+		return filepath.Join(dir, ".config", dirName)
 	}
 
 	panic(errors.New("$HOME is empty"))

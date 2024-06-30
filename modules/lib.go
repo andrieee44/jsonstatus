@@ -171,16 +171,16 @@ func icon(icons []string, max, val float64) string {
 	var index, iconsLen int
 
 	iconsLen = len(icons)
-	index = int(float64(iconsLen) / max * val)
-
-	switch {
-	case iconsLen == 0:
+	if iconsLen == 0 {
 		return ""
-	case index >= iconsLen:
-		return icons[iconsLen-1]
-	default:
-		return icons[index]
 	}
+
+	index = int(float64(iconsLen) / max * val)
+	if index >= iconsLen {
+		return icons[iconsLen-1]
+	}
+
+	return icons[index]
 }
 
 func mkWatcher(files []string) *fsnotify.Watcher {
